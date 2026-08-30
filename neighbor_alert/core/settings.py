@@ -151,4 +151,4 @@ SIMPLE_JWT = {
 }
 
 # Login Redirect Settings (লগইন করা না থাকলে রিডায়রেক্ট করার জন্য)
-LOGIN_URL = '/admin/login/'
+LOGIN_URL = '/login/'
