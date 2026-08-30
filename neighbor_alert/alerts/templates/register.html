@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+<!--  -->
+{% block title %}Register Account - NeighborAlert BD{% endblock %}
+<!--  -->
+{% block content %}
+<div class="min-h-[75vh] flex items-center justify-center py-12 px-4">
+  <div
+    class="max-w-md w-full bg-white p-8 rounded-3xl shadow-lg border border-gray-100 space-y-6"
+  >
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900">Create Account</h2>
+      <p class="text-xs text-gray-500 mt-2">
+        Join the nationwide emergency response community.
+      </p>
+    </div>
+
+    <form id="registerForm" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Username</label
+        >
+        <input
+          type="text"
+          id="regUser"
+          required
+          placeholder="johndoe"
+          class="w-full border rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Email Address</label
+        >
+        <input
+          type="email"
+          id="regEmail"
+          required
+          placeholder="john@example.com"
+          class="w-full border rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Password</label
+        >
+        <input
+          type="password"
+          id="regPass"
+          required
+          placeholder="••••••••"
+          class="w-full border rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
+        />
+      </div>
+      <button
+        type="submit"
+        id="regBtn"
+        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-md"
+      >
+        Register Account
+      </button>
+    </form>
+
+    <p class="text-xs text-center text-gray-500">
+      Already have an account?
+      <a
+        href="{% url 'login_page' %}"
+        class="text-red-600 font-bold hover:underline"
+        >Log in here</a
+      >
+    </p>
+  </div>
+</div>
+
+<script>
+  document
+    .getElementById("registerForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("regBtn");
+      btn.innerText = "Creating Account...";
+      btn.disabled = true;
+
+      const payload = {
+        username: document.getElementById("regUser").value,
+        email: document.getElementById("regEmail").value,
+        password: document.getElementById("regPass").value,
+      };
+
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert("Registration successful! Please login.");
+          window.location.href = "{% url 'login_page' %}";
+        } else {
+          alert(
+            "Registration failed. Check if username or email is already taken.",
+          );
+        }
+      } catch (err) {
+        alert("Error connecting to backend server.");
+      } finally {
+        btn.innerText = "Register Account";
+        btn.disabled = false;
+      }
+    });
+</script>
+{% endblock %}

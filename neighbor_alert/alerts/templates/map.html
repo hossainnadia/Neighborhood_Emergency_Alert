@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+<!--  -->
+{% block title %}Live Emergency Map - Bangladesh Safety Network{% endblock %}
+<!--  -->
+{% block content %}
+<!-- Leaflet.js CSS & JS CDN (অত্যন্ত জরুরি) -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="max-w-6xl mx-auto my-8 px-4">
+  <!-- Top Header & Filter -->
+  <div
+    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+  >
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        📍 Live Safety Map (Bangladesh)
+      </h2>
+      <p class="text-sm text-gray-500 mt-1">
+        Real-time emergency reports and safe zones across all 64 districts.
+      </p>
+    </div>
+
+    <!-- Controls: Locate Me & Region Jump -->
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        onclick="locateUser()"
+        class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-2.5 rounded-xl border border-red-200 flex items-center gap-1.5 transition"
+      >
+        🎯 Locate Me
+      </button>
+
+      <div class="flex items-center gap-2">
+        <label class="text-xs font-bold text-gray-600 uppercase">Region:</label>
+        <select
+          id="regionSelect"
+          onchange="focusRegion()"
+          class="border rounded-xl p-2 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
+        >
+          <option value="bd">Whole Bangladesh 🇧🇩</option>
+          <option value="dhaka">Dhaka Division</option>
+          <option value="ctg">Chattogram Division</option>
+          <option value="sylhet">Sylhet Division</option>
+          <option value="rajshahi">Rajshahi Division</option>
+          <option value="khulna">Khulna Division</option>
+          <option value="barishal">Barishal Division</option>
+          <option value="rangpur">Rangpur Division</option>
+          <option value="mymensingh">Mymensingh Division</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Box -->
+  <div class="bg-white p-3 rounded-2xl shadow-md border border-gray-100">
+    <div id="safetyMap" class="w-full h-[550px] rounded-xl z-0"></div>
+  </div>
+</div>
+
+<script>
+  // Bangladesh Center Coordinates
+  const bdLat = 23.685;
+  const bdLng = 90.3563;
+  const map = L.map("safetyMap").setView([bdLat, bdLng], 7);
+
+  // OpenStreetMap Tiles
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap contributors",
+  }).addTo(map);
+
+  // Emergency Type-wise Icons
+  const emergencyIcons = {
+    Fire: "🔥",
+    Flood: "🌧️",
+    Accident: "🚗",
+    Crime: "🚨",
+    Medical: "🚑",
+    Other: "⚠️",
+  };
+
+  // Create Custom Emoji Leaflet Marker
+  function createCustomMarker(emojiKey) {
+    const emoji = emergencyIcons[emojiKey] || "⚠️";
+    return L.divIcon({
+      html: `<div style="font-size: 24px; background: white; padding: 4px; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); text-align: center; width: 36px; height: 36px; line-height: 28px;">${emoji}</div>`,
+      className: "",
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+    });
+  }
+
+  // Divisional Coordinates for Regional Jump
+  const regions = {
+    bd: { lat: 23.685, lng: 90.3563, zoom: 7 },
+    dhaka: { lat: 23.8103, lng: 90.4125, zoom: 11 },
+    ctg: { lat: 22.3569, lng: 91.7832, zoom: 11 },
+    sylhet: { lat: 24.8949, lng: 91.8687, zoom: 11 },
+    rajshahi: { lat: 24.3745, lng: 88.6042, zoom: 11 },
+    khulna: { lat: 22.8456, lng: 89.5403, zoom: 11 },
+    barishal: { lat: 22.701, lng: 90.3535, zoom: 11 },
+    rangpur: { lat: 25.7439, lng: 89.2752, zoom: 11 },
+    mymensingh: { lat: 24.7471, lng: 90.4203, zoom: 11 },
+  };
+
+  function focusRegion() {
+    const val = document.getElementById("regionSelect").value;
+    const selected = regions[val] || regions.bd;
+    map.flyTo([selected.lat, selected.lng], selected.zoom, { duration: 1.5 });
+  }
+
+  // User Current Location Finder
+  function locateUser() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          map.flyTo([latitude, longitude], 14, { duration: 1.5 });
+
+          L.circleMarker([latitude, longitude], {
+            radius: 8,
+            fillColor: "#3B82F6",
+            color: "#ffffff",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.9,
+          })
+            .addTo(map)
+            .bindPopup("<b>📍 You are here</b>")
+            .openPopup();
+        },
+        () => {
+          alert("Unable to fetch your location. Please enable GPS.");
+        },
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  }
+
+  // Fetch Dynamic Emergency Markers from REST API
+  async function loadMapIncidents() {
+    try {
+      const token = localStorage.getItem("access_token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const res = await fetch("/api/emergency", { headers });
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        data.forEach((item) => {
+          if (item.latitude && item.longitude) {
+            const customIcon = createCustomMarker(item.type);
+            const marker = L.marker([item.latitude, item.longitude], {
+              icon: customIcon,
+            }).addTo(map);
+
+            const severityColor =
+              item.severity === "High"
+                ? "text-red-600"
+                : item.severity === "Medium"
+                  ? "text-orange-500"
+                  : "text-yellow-600";
+
+            marker.bindPopup(`
+              <div class="p-2 max-w-xs">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-xs font-bold ${severityColor} uppercase">${item.type} (${item.severity})</span>
+                </div>
+                <h4 class="font-bold text-gray-900 text-sm mb-1">${item.title}</h4>
+                <p class="text-xs text-gray-600 mb-2">${item.description || "No details available."}</p>
+                <div class="text-[11px] text-gray-400 border-t pt-1">📍 ${item.location}</div>
+              </div>
+            `);
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching map markers:", error);
+    }
+  }
+
+  loadMapIncidents();
+</script>
+{% endblock %}

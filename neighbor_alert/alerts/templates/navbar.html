@@ -1,0 +1,248 @@
+<nav class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+    <!-- Logo -->
+    <a
+      href="{% url 'home' %}"
+      class="text-xl font-black tracking-wide flex items-center gap-2 group"
+    >
+      <div
+        class="bg-red-600/20 p-2 rounded-xl border border-red-500/30 group-hover:bg-red-600 transition duration-300"
+      >
+        <svg
+          class="w-6 h-6 text-red-500 group-hover:text-white transition"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+          ></path>
+        </svg>
+      </div>
+      <span class="text-white"
+        >Neighbor<span class="text-red-500">Alert</span></span
+      >
+    </a>
+
+    <!-- Mobile Hamburger Button -->
+    <button
+      id="menu-btn"
+      type="button"
+      class="md:hidden text-gray-300 hover:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+    >
+      <svg
+        id="menu-icon-open"
+        class="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16m-7 6h7"
+        ></path>
+      </svg>
+      <svg
+        id="menu-icon-close"
+        class="w-6 h-6 hidden"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        ></path>
+      </svg>
+    </button>
+
+    <!-- Desktop Navigation Links -->
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="{% url 'home' %}" class="hover:text-red-400 transition">Home</a>
+      <a href="{% url 'alerts_page' %}" class="hover:text-red-400 transition"
+        >Alerts</a
+      >
+      <a href="{% url 'community_page' %}" class="hover:text-red-400 transition"
+        >Community</a
+      >
+      <a href="{% url 'map_page' %}" class="hover:text-red-400 transition"
+        >Live Map</a
+      >
+      <a href="{% url 'dashboard_page' %}" class="hover:text-red-400 transition"
+        >Dashboard</a
+      >
+
+      <!-- Guest Links (লগইন না থাকলে দেখাবে) -->
+      <div id="nav-guest" class="flex items-center gap-3">
+        <a
+          href="{% url 'login_page' %}"
+          class="bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 rounded-lg border border-slate-700 transition"
+          >Login</a
+        >
+        <a
+          href="{% url 'register_page' %}"
+          class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition shadow-md hover:shadow-red-600/30"
+          >Register</a
+        >
+      </div>
+
+      <!-- User Profile & Logout (লগইন থাকলে দেখাবে) -->
+      <div id="nav-user" class="hidden flex items-center gap-3">
+        <div
+          class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700"
+        >
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span id="nav-username" class="text-xs font-bold text-gray-200"
+            >User</span
+          >
+        </div>
+        <button
+          onclick="logoutUser()"
+          class="text-xs text-red-400 hover:text-red-300 font-bold bg-red-950/40 border border-red-800/50 px-3 py-1.5 rounded-xl transition"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden bg-slate-900 border-t border-slate-800 px-4 py-4 space-y-3 text-sm font-medium"
+  >
+    <a
+      href="{% url 'home' %}"
+      class="block text-gray-200 hover:text-red-400 py-2 border-b border-slate-800/50"
+      >Home</a
+    >
+    <a
+      href="{% url 'alerts_page' %}"
+      class="block text-gray-200 hover:text-red-400 py-2 border-b border-slate-800/50"
+      >Alerts</a
+    >
+    <a
+      href="{% url 'community_page' %}"
+      class="block text-gray-200 hover:text-red-400 py-2 border-b border-slate-800/50"
+      >Community</a
+    >
+    <a
+      href="{% url 'map_page' %}"
+      class="block text-gray-200 hover:text-red-400 py-2 border-b border-slate-800/50"
+      >Live Map</a
+    >
+    <a
+      href="{% url 'dashboard_page' %}"
+      class="block text-gray-200 hover:text-red-400 py-2 border-b border-slate-800/50"
+      >Dashboard</a
+    >
+
+    <!-- Mobile Guest Buttons -->
+    <div id="mobile-guest" class="flex gap-3 pt-3">
+      <a
+        href="{% url 'login_page' %}"
+        class="w-1/2 text-center bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl border border-slate-700 transition"
+        >Login</a
+      >
+      <a
+        href="{% url 'register_page' %}"
+        class="w-1/2 text-center bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl transition font-bold"
+        >Register</a
+      >
+    </div>
+
+    <!-- Mobile User Profile -->
+    <div
+      id="mobile-user"
+      class="hidden pt-3 flex justify-between items-center border-t border-slate-800"
+    >
+      <span id="mobile-username" class="text-sm font-bold text-gray-200"
+        >User Profile</span
+      >
+      <button
+        onclick="logoutUser()"
+        class="text-xs text-red-400 bg-red-950/50 px-3 py-1.5 rounded-lg border border-red-800/50 font-bold"
+      >
+        Logout
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Navbar Authentication Script -->
+<script>
+  // Toggle Mobile Menu
+  const menuBtn = document.getElementById("menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const iconOpen = document.getElementById("menu-icon-open");
+  const iconClose = document.getElementById("menu-icon-close");
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+      iconOpen.classList.toggle("hidden");
+      iconClose.classList.toggle("hidden");
+    });
+  }
+
+  // Check Auth State on Page Load
+  async function checkAuthState() {
+    const token = localStorage.getItem("access_token");
+
+    const navGuest = document.getElementById("nav-guest");
+    const navUser = document.getElementById("nav-user");
+    const mobileGuest = document.getElementById("mobile-guest");
+    const mobileUser = document.getElementById("mobile-user");
+
+    if (token) {
+      try {
+        // Fetch logged-in user details
+        const res = await fetch("/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.ok) {
+          const user = await res.json();
+
+          // UI Switch to Logged In State
+          if (navGuest) navGuest.classList.add("hidden");
+          if (navUser) navUser.classList.remove("hidden");
+          if (mobileGuest) mobileGuest.classList.add("hidden");
+          if (mobileUser) mobileUser.classList.remove("hidden");
+
+          document.getElementById("nav-username").innerText =
+            user.username || "Profile";
+          document.getElementById("mobile-username").innerText =
+            `👤 ${user.username}`;
+          return;
+        }
+      } catch (err) {
+        console.error("Auth Check Failed", err);
+      }
+    }
+
+    // Default: Show Guest Buttons (Login/Register)
+    if (navGuest) navGuest.classList.remove("hidden");
+    if (navUser) navUser.classList.add("hidden");
+    if (mobileGuest) mobileGuest.classList.remove("hidden");
+    if (mobileUser) mobileUser.classList.add("hidden");
+  }
+
+  // Logout Functionality
+  function logoutUser() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    alert("Logged out successfully!");
+    window.location.href = "{% url 'login_page' %}";
+  }
+
+  // Execute check on page load
+  checkAuthState();
+</script>

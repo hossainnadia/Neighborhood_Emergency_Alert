@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+<!--  -->
+{% block content %}
+<!-- SweetAlert2 CDN Notification Alert-এর জন্য -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="max-w-6xl mx-auto my-8 px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+  <!-- Sidebar -->
+  <div class="space-y-6">
+    <button
+      onclick="openModal(false)"
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow transition"
+    >
+      ➕ Create New Post
+    </button>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <h3 class="font-bold text-gray-900 mb-4">Categories</h3>
+      <ul class="space-y-2 text-sm font-medium text-gray-600">
+        <li
+          onclick="filterCategory('All')"
+          class="hover:text-blue-600 cursor-pointer font-bold text-blue-600"
+        >
+          🌐 All Posts
+        </li>
+        <li
+          onclick="filterCategory('Help')"
+          class="hover:text-blue-600 cursor-pointer"
+        >
+          🆘 Help Needed
+        </li>
+        <li
+          onclick="filterCategory('LostFound')"
+          class="hover:text-blue-600 cursor-pointer"
+        >
+          🔎 Lost & Found
+        </li>
+        <li
+          onclick="filterCategory('Announcement')"
+          class="hover:text-blue-600 cursor-pointer"
+        >
+          📣 Local Announcement
+        </li>
+        <li
+          onclick="filterCategory('Event')"
+          class="hover:text-blue-600 cursor-pointer"
+        >
+          🎉 Community Event
+        </li>
+        <li
+          onclick="filterCategory('Issue')"
+          class="hover:text-blue-600 cursor-pointer"
+        >
+          🏠 Neighborhood Issue
+        </li>
+        <li
+          onclick="filterCategory('General')"
+          class="hover:text-blue-600 cursor-pointer"
+        >
+          💡 General Discussion
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="md:col-span-2 space-y-4">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-2xl font-bold text-gray-900">📢 Community Board</h3>
+      <span
+        id="activeCatLabel"
+        class="text-xs font-semibold bg-gray-200 text-gray-700 px-3 py-1 rounded-full"
+        >All Posts</span
+      >
+    </div>
+    <div id="communityFeed" class="space-y-4">
+      <p class="text-gray-500">Loading posts...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  id="postModal"
+  class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4"
+>
+  <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
+    <h3 id="modalTitle" class="text-xl font-bold text-gray-900 mb-4">
+      Create a Post
+    </h3>
+    <form id="createPostForm" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" id="editPostId" value="" />
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Category</label
+        >
+        <select
+          id="postCategory"
+          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+        >
+          <option value="Help">Help Needed 🆘</option>
+          <option value="LostFound">Lost & Found 🔎</option>
+          <option value="Announcement">Local Announcement 📣</option>
+          <option value="Event">Community Event 🎉</option>
+          <option value="Issue">Neighborhood Issue 🏠</option>
+          <option value="General" selected>General Discussion 💡</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Title</label
+        >
+        <input
+          type="text"
+          id="postTitle"
+          required
+          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Location</label
+        >
+        <input
+          type="text"
+          id="postLocation"
+          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
+          >Content</label
+        >
+        <textarea
+          id="postContent"
+          rows="4"
+          required
+          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          onclick="closeModal()"
+          class="px-5 py-2.5 rounded-xl border text-gray-600 text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          id="savePostBtn"
+          class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
+        >
+          Save Post
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  let currentPosts = [];
+  let currentUser = null;
+
+  const categoryLabels = {
+    Help: "🆘 Help Needed",
+    LostFound: "🔎 Lost & Found",
+    Announcement: "📣 Announcement",
+    Event: "🎉 Event",
+    Issue: "🏠 Issue",
+    General: "💡 General",
+  };
+
+  // Toast Notification Function
+  function showNotification(icon, title) {
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: icon,
+      title: title,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    });
+  }
+
+  function openModal(isEdit = false, postId = null) {
+    const modal = document.getElementById("postModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const editPostId = document.getElementById("editPostId");
+
+    if (isEdit && postId) {
+      modalTitle.innerText = "Edit Post";
+      editPostId.value = postId;
+      const post = currentPosts.find((p) => p.id === postId);
+      if (post) {
+        document.getElementById("postCategory").value =
+          post.category || "General";
+        document.getElementById("postTitle").value = post.title || "";
+        document.getElementById("postLocation").value = post.location || "";
+        document.getElementById("postContent").value = post.content || "";
+      }
+    } else {
+      modalTitle.innerText = "Create a Post";
+      editPostId.value = "";
+      document.getElementById("createPostForm").reset();
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("postModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
+  async function makeApiRequest(url, method = "GET", body = null) {
+    const options = {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+    };
+    const token = localStorage.getItem("access_token");
+    if (token) options.headers["Authorization"] = `Bearer ${token}`;
+    if (body) options.body = JSON.stringify(body);
+
+    if (typeof apiFetch === "function") {
+      return await apiFetch(url, options);
+    }
+    return await fetch(url, options);
+  }
+
+  async function getCurrentUser() {
+    try {
+      const res = await makeApiRequest("/api/auth/profile");
+      if (res.ok) {
+        currentUser = await res.json();
+      }
+    } catch (e) {
+      console.log("Not logged in");
+    }
+  }
+
+  async function loadCommunity() {
+    try {
+      if (!currentUser) await getCurrentUser();
+
+      const res = await makeApiRequest("/api/posts");
+      if (res.ok) {
+        currentPosts = await res.json();
+        renderPosts(currentPosts);
+      } else {
+        document.getElementById("communityFeed").innerHTML =
+          `<p class="text-red-500 text-sm">Error loading posts (${res.status})</p>`;
+      }
+    } catch (err) {
+      document.getElementById("communityFeed").innerHTML =
+        `<p class="text-red-500 text-sm">Failed to connect to server.</p>`;
+    }
+  }
+
+  function renderPosts(posts) {
+    const container = document.getElementById("communityFeed");
+    container.innerHTML = "";
+
+    if (!Array.isArray(posts) || posts.length === 0) {
+      container.innerHTML = `<p class="text-gray-400 italic bg-white p-6 rounded-2xl border text-center text-sm">No posts found.</p>`;
+      return;
+    }
+
+    posts.forEach((post) => {
+      const catBadge =
+        categoryLabels[post.category] || post.category || "General";
+      const isOwner =
+        currentUser &&
+        post.user_details &&
+        currentUser.id === post.user_details.id;
+
+      const actionButtons = isOwner
+        ? `
+        <div class="flex items-center gap-2">
+          <button onclick="openModal(true, '${post.id}')" class="text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 font-semibold px-3 py-1.5 rounded-lg border border-amber-200 transition">✏️ Edit</button>
+          <button onclick="deletePost('${post.id}')" class="text-xs bg-red-50 text-red-600 hover:bg-red-100 font-semibold px-3 py-1.5 rounded-lg border border-red-200 transition">🗑️ Delete</button>
+        </div>
+      `
+        : "";
+
+      // Comments List Builder
+      const commentsList =
+        post.comments && post.comments.length > 0
+          ? post.comments
+              .map(
+                (c) => `
+            <div class="bg-gray-50 p-2.5 rounded-xl text-xs border border-gray-100">
+              <span class="font-bold text-gray-800">${c.user_username || "User"}:</span>
+              <span class="text-gray-700">${c.text}</span>
+            </div>
+          `,
+              )
+              .join("")
+          : `<p class="text-gray-400 text-xs italic">No comments yet.</p>`;
+
+      container.innerHTML += `
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition space-y-4">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-xs px-3 py-1 bg-blue-100 text-blue-800 font-semibold rounded-full">${catBadge}</span>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-400">📍 ${post.location || "Area"}</span>
+                ${actionButtons}
+              </div>
+            </div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">${post.title}</h4>
+            <p class="text-gray-600 text-sm mb-2 leading-relaxed">${post.content}</p>
+            <p class="text-xs text-gray-400">Posted by: <span class="font-medium text-gray-700">${post.user_details ? post.user_details.username : "Anonymous"}</span></p>
+          </div>
+
+          <!-- Comment Section -->
+          <div class="border-t pt-4 space-y-3">
+            <h5 class="text-xs font-bold text-gray-700 flex items-center gap-1">💬 Comments (${post.comments ? post.comments.length : 0})</h5>
+            
+            <div class="space-y-2 max-h-40 overflow-y-auto">
+              ${commentsList}
+            </div>
+
+            <!-- Add Comment Form -->
+            <form onsubmit="submitComment(event, '${post.id}')" class="flex gap-2 pt-1">
+              <input 
+                type="text" 
+                id="comment-input-${post.id}" 
+                required 
+                placeholder="Write a comment..." 
+                class="w-full border rounded-xl px-3 py-2 text-xs bg-gray-50 outline-none focus:ring-1 focus:ring-blue-500" 
+              />
+              <button 
+                type="submit" 
+                class="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl text-xs font-bold transition shrink-0"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // SUBMIT Comment Function
+  async function submitComment(event, postId) {
+    event.preventDefault();
+    const input = document.getElementById(`comment-input-${postId}`);
+    const text = input.value.trim();
+    if (!text) return;
+
+    try {
+      const res = await makeApiRequest("/api/comments", "POST", {
+        post: postId,
+        text: text,
+      });
+
+      if (res.ok) {
+        input.value = "";
+        showNotification("success", "Comment added!");
+        loadCommunity();
+      } else {
+        showNotification("error", "Failed to add comment.");
+      }
+    } catch (err) {
+      showNotification("error", "Network Error!");
+    }
+  }
+
+  function filterCategory(cat) {
+    document.getElementById("activeCatLabel").innerText =
+      categoryLabels[cat] || cat;
+    if (cat === "All") renderPosts(currentPosts);
+    else renderPosts(currentPosts.filter((p) => p.category === cat));
+  }
+
+  // DELETE Post Function With Alert
+  async function deletePost(postId) {
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this post!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmColor: "#d33",
+      cancelColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirmResult.isConfirmed) {
+      try {
+        const res = await makeApiRequest(`/api/posts/${postId}`, "DELETE");
+        if (res.ok) {
+          showNotification("success", "Post deleted successfully!");
+          loadCommunity();
+        } else {
+          showNotification("error", "Failed to delete post.");
+        }
+      } catch (err) {
+        showNotification("error", "Network error.");
+      }
+    }
+  }
+
+  // CREATE / UPDATE Form Handler With Alert
+  document
+    .getElementById("createPostForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("savePostBtn");
+      const editPostId = document.getElementById("editPostId").value;
+
+      btn.disabled = true;
+      btn.innerText = "Saving...";
+
+      const payload = {
+        category: document.getElementById("postCategory").value,
+        title: document.getElementById("postTitle").value,
+        location: document.getElementById("postLocation").value,
+        content: document.getElementById("postContent").value,
+        status: "Active",
+      };
+
+      const isEdit = Boolean(editPostId);
+      const url = isEdit ? `/api/posts/${editPostId}` : "/api/posts";
+      const method = isEdit ? "PUT" : "POST";
+
+      try {
+        const res = await makeApiRequest(url, method, payload);
+
+        if (res.ok) {
+          closeModal();
+          document.getElementById("createPostForm").reset();
+          showNotification(
+            "success",
+            isEdit
+              ? "Post updated successfully!"
+              : "Post published successfully!",
+          );
+          loadCommunity();
+        } else {
+          showNotification("error", "Failed to save post.");
+        }
+      } catch (err) {
+        showNotification("error", "Network Connection Error!");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Save Post";
+      }
+    });
+
+  loadCommunity();
+</script>
+{% endblock %}

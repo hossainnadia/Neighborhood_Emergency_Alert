@@ -1,0 +1,140 @@
+<footer class="bg-slate-900 text-gray-300 pt-16 pb-8 border-t border-slate-800">
+  <div
+    class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10"
+  >
+    <!-- Column 1: Brand & Emergency Hotline -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-white text-2xl font-black">
+        <span class="text-red-500"></span> NeighborAlert BD
+      </div>
+      <p class="text-xs text-gray-400 leading-relaxed">
+        A nationwide real-time emergency safety network connecting citizens
+        across all 64 districts in Bangladesh for instant response and mutual
+        help.
+      </p>
+      <div class="pt-2">
+        <p
+          class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2"
+        >
+          National Hotline
+        </p>
+        <div class="flex gap-2">
+          <span
+            class="bg-red-600 text-white font-extrabold text-sm px-3 py-1.5 rounded-lg shadow-sm"
+            >999</span
+          >
+          <span
+            class="bg-slate-800 text-gray-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700"
+            >Police / Fire / Ambulance</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: Navigation Links -->
+    <div class="space-y-4">
+      <h4 class="text-white text-sm font-bold uppercase tracking-wider">
+        Quick Navigation
+      </h4>
+      <ul class="space-y-2 text-xs">
+        <li>
+          <a
+            href="{% url 'home' %}"
+            class="hover:text-red-400 transition flex items-center gap-1.5"
+            ><span>→</span> Home</a
+          >
+        </li>
+        <li>
+          <a
+            href="{% url 'map_page' %}"
+            class="hover:text-red-400 transition flex items-center gap-1.5"
+            ><span>→</span> Live Bangladesh Map</a
+          >
+        </li>
+        <li>
+          <a
+            href="{% url 'alerts_page' %}"
+            class="hover:text-red-400 transition flex items-center gap-1.5"
+            ><span>→</span> Active Emergency Feeds</a
+          >
+        </li>
+        <li>
+          <a
+            href="{% url 'community_page' %}"
+            class="hover:text-red-400 transition flex items-center gap-1.5"
+            ><span>→</span> Community Notices</a
+          >
+        </li>
+        <li>
+          <a
+            href="#"
+            class="hover:text-red-400 transition flex items-center gap-1.5"
+            ><span>→</span> Safety Tips & Guidelines</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Regional Coverage -->
+    <div class="space-y-4">
+      <h4 class="text-white text-sm font-bold uppercase tracking-wider">
+        Divisional Coverage
+      </h4>
+      <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+        <span class="hover:text-white transition">📍 Dhaka</span>
+        <span class="hover:text-white transition">📍 Chattogram</span>
+        <span class="hover:text-white transition">📍 Sylhet</span>
+        <span class="hover:text-white transition">📍 Rajshahi</span>
+        <span class="hover:text-white transition">📍 Khulna</span>
+        <span class="hover:text-white transition">📍 Barishal</span>
+        <span class="hover:text-white transition">📍 Rangpur</span>
+        <span class="hover:text-white transition">📍 Mymensingh</span>
+      </div>
+      <p class="text-[11px] text-gray-500 pt-2">
+        Serving all 64 districts in Bangladesh 24/7.
+      </p>
+    </div>
+
+    <!-- Column 4: Alerts Newsletter -->
+    <div class="space-y-4">
+      <h4 class="text-white text-sm font-bold uppercase tracking-wider">
+        Stay Alerted
+      </h4>
+      <p class="text-xs text-gray-400">
+        Subscribe to receive urgent safety advisories in your email.
+      </p>
+      <form
+        onsubmit="
+          event.preventDefault();
+          alert('Subscribed to Emergency Alerts!');
+        "
+        class="space-y-2"
+      >
+        <input
+          type="email"
+          placeholder="Enter your email"
+          required
+          class="w-full bg-slate-800 border border-slate-700 text-xs text-white p-3 rounded-xl focus:ring-2 focus:ring-red-500 outline-none"
+        />
+        <button
+          type="submit"
+          class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl transition"
+        >
+          Subscribe Alerts
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div
+    class="max-w-6xl mx-auto px-4 mt-12 pt-6 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4"
+  >
+    <p>© 2026 NeighborAlert BD. All rights reserved.</p>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-gray-300 transition">Privacy Policy</a>
+      <a href="#" class="hover:text-gray-300 transition">Terms of Service</a>
+      <a href="#" class="hover:text-gray-300 transition">Helpline Contacts</a>
+    </div>
+  </div>
+</footer>

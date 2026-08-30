@@ -1,0 +1,630 @@
+{% extends 'base.html' %}
+<!--  -->
+{% block content %}
+<!-- SweetAlert2 CSS & JS CDN -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="max-w-6xl mx-auto my-8 px-4 space-y-8">
+  <!-- Top Bar -->
+  <div
+    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center"
+  >
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        🚨 Emergency Feeds & Live Alerts
+      </h2>
+      <p class="text-xs text-gray-500 mt-1">
+        Real-time emergency updates reported by residents and IoT sensors.
+      </p>
+    </div>
+    <!-- Modal Open Button -->
+    <button
+      onclick="openCreateModal()"
+      class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition shadow-md"
+    >
+      + Report New Emergency
+    </button>
+  </div>
+
+  <!-- Alert Feeds Container -->
+  <div id="alertContainer" class="space-y-4">
+    <!-- Javascript dynamic cards will load here -->
+  </div>
+
+  <!-- Extra Content Section 1: Live Status Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-2"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-bold text-lg"
+        >
+          🚑
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-gray-900">Medical Response</h4>
+          <p class="text-xs text-emerald-600 font-bold">● Active Units Ready</p>
+        </div>
+      </div>
+      <p
+        class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-100"
+      >
+        Rapid dispatch ambulances connected to 999 response network for
+        immediate critical patient transport.
+      </p>
+    </div>
+
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-2"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center font-bold text-lg"
+        >
+          💥
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-gray-900">Fire & Rescue Service</h4>
+          <p class="text-xs text-emerald-600 font-bold">● Standby Mode</p>
+        </div>
+      </div>
+      <p
+        class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-100"
+      >
+        Direct link to Bangladesh Fire Service and Civil Defence local control
+        units across 64 districts.
+      </p>
+    </div>
+
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-2"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-lg"
+        >
+          🛡️
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-gray-900">Law Enforcement</h4>
+          <p class="text-xs text-emerald-600 font-bold">
+            ● Patrol Sync Enabled
+          </p>
+        </div>
+      </div>
+      <p
+        class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-100"
+      >
+        Automated incident alerts routed to police control centers for immediate
+        public safety intervention.
+      </p>
+    </div>
+  </div>
+
+  <!-- Extra Content Section 2: Safety Action Guide -->
+  <div
+    class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-6 sm:p-8 text-white space-y-6 shadow-xl"
+  >
+    <div
+      class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-gray-700 pb-4"
+    >
+      <div>
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <span>📋</span> Standard Emergency Protocols
+        </h3>
+        <p class="text-xs text-gray-400 mt-1">
+          What to do while waiting for emergency response teams
+        </p>
+      </div>
+      <span
+        class="text-xs font-bold bg-red-600/30 text-red-300 border border-red-500/30 px-3 py-1.5 rounded-full w-fit"
+      >
+        Official Guidelines
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div
+        class="bg-gray-800/60 p-4 rounded-2xl border border-gray-700/50 space-y-2"
+      >
+        <span class="text-xs font-black text-red-400">STEP 01</span>
+        <h5 class="font-bold text-sm text-gray-200">Stay Calm & Assess</h5>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Evaluate immediate surroundings for hazard expansion like electrical
+          sparks, gas leaks, or structure weakness.
+        </p>
+      </div>
+
+      <div
+        class="bg-gray-800/60 p-4 rounded-2xl border border-gray-700/50 space-y-2"
+      >
+        <span class="text-xs font-black text-red-400">STEP 02</span>
+        <h5 class="font-bold text-sm text-gray-200">Post Accurate Report</h5>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Provide explicit landmark names and active GPS details when reporting
+          an incident on this dashboard.
+        </p>
+      </div>
+
+      <div
+        class="bg-gray-800/60 p-4 rounded-2xl border border-gray-700/50 space-y-2"
+      >
+        <span class="text-xs font-black text-red-400">STEP 03</span>
+        <h5 class="font-bold text-sm text-gray-200">Alert Neighbors</h5>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Verbally notify surrounding residents without creating panic. Keep
+          access roads clear for emergency vehicles.
+        </p>
+      </div>
+
+      <div
+        class="bg-gray-800/60 p-4 rounded-2xl border border-gray-700/50 space-y-2"
+      >
+        <span class="text-xs font-black text-red-400">STEP 04</span>
+        <h5 class="font-bold text-sm text-gray-200">Direct First Responders</h5>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Designate one person near the main entrance or road intersection to
+          guide arriving rescue vehicles.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extra Content Section 3: Emergency Contacts Quick Directory -->
+  <div
+    class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4"
+  >
+    <div class="flex justify-between items-center">
+      <h3 class="font-bold text-gray-900 text-lg flex items-center gap-2">
+        <span>📞</span> Emergency Hotline Directory
+      </h3>
+      <span class="text-xs font-bold text-gray-400">24/7 Toll-Free</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="p-3 bg-red-50 border border-red-100 rounded-xl text-center">
+        <p class="text-[11px] font-bold text-red-500 uppercase">
+          National Emergency
+        </p>
+        <p class="text-xl font-black text-red-700 mt-0.5">999</p>
+      </div>
+
+      <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-center">
+        <p class="text-[11px] font-bold text-blue-500 uppercase">
+          Ambulance Service
+        </p>
+        <p class="text-xl font-black text-blue-700 mt-0.5">16163</p>
+      </div>
+
+      <div
+        class="p-3 bg-orange-50 border border-orange-100 rounded-xl text-center"
+      >
+        <p class="text-[11px] font-bold text-orange-500 uppercase">
+          Fire Service Control
+        </p>
+        <p class="text-xl font-black text-orange-700 mt-0.5">102</p>
+      </div>
+
+      <div
+        class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-center"
+      >
+        <p class="text-[11px] font-bold text-emerald-500 uppercase">
+          Child & Women Helpline
+        </p>
+        <p class="text-xl font-black text-emerald-700 mt-0.5">109</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Submission/Update Modal -->
+<div
+  id="reportModal"
+  class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+>
+  <div
+    class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4 max-h-[90vh] overflow-y-auto"
+  >
+    <div class="flex justify-between items-center border-b pb-3">
+      <h3 id="modalTitle" class="font-bold text-lg text-gray-900">
+        🚨 Report New Emergency
+      </h3>
+      <button
+        onclick="closeModal()"
+        class="text-gray-400 hover:text-gray-600 font-bold"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form id="emergencyForm" class="space-y-3">
+      {% csrf_token %}
+      <input type="hidden" id="editId" value="" />
+      <div>
+        <label class="text-xs font-bold text-gray-600 uppercase"
+          >Emergency Type</label
+        >
+        <select
+          id="type"
+          required
+          class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none"
+        >
+          <option value="Fire">Fire Incident 💥</option>
+          <option value="Accident">Road Accident 🚗</option>
+          <option value="Medical">Medical Emergency 🚑</option>
+          <option value="Crime">Crime Alert 🚓</option>
+          <option value="Flood">Flood 🌧️</option>
+          <option value="Other">Other ⚠️</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-600 uppercase">Title</label>
+        <input
+          type="text"
+          id="title"
+          required
+          placeholder="e.g. Fire at Agrabad Commercial Area"
+          class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none"
+        />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-600 uppercase"
+          >Description</label
+        >
+        <textarea
+          id="description"
+          placeholder="Enter additional details..."
+          class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none h-20"
+        ></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-600 uppercase"
+          >Location</label
+        >
+        <input
+          type="text"
+          id="location"
+          required
+          placeholder="e.g. Chittagong / Dhaka"
+          class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none"
+        />
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs font-bold text-gray-600 uppercase"
+            >Latitude</label
+          >
+          <input
+            type="number"
+            step="any"
+            id="latitude"
+            placeholder="22.3569"
+            class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none"
+          />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-600 uppercase"
+            >Longitude</label
+          >
+          <input
+            type="number"
+            step="any"
+            id="longitude"
+            placeholder="91.7832"
+            class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none"
+          />
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-600 uppercase"
+          >Severity</label
+        >
+        <select
+          id="severity"
+          class="w-full border rounded-xl p-2.5 text-sm bg-gray-50 outline-none"
+        >
+          <option value="High">High 🔴</option>
+          <option value="Medium">Medium 🟠</option>
+          <option value="Low">Low 🟡</option>
+        </select>
+      </div>
+      <button
+        type="submit"
+        id="submitBtn"
+        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition mt-2"
+      >
+        Submit Report
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Toast Notification setup
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener("mouseenter", Swal.stopTimer);
+      toast.addEventListener("mouseleave", Swal.resumeTimer);
+    },
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Auto-refresh logic for Token
+  async function getValidToken() {
+    let token = localStorage.getItem("access_token");
+    const refresh = localStorage.getItem("refresh_token");
+
+    if (!token && refresh) {
+      try {
+        const res = await fetch("/api/token/refresh/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh: refresh }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("access_token", data.access);
+          token = data.access;
+        }
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+      }
+    }
+    return token;
+  }
+
+  async function getHeaders() {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    const csrfToken = getCookie("csrftoken");
+    if (csrfToken) headers["X-CSRFToken"] = csrfToken;
+
+    const token = await getValidToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return headers;
+  }
+
+  function handleUnauthorized() {
+    Toast.fire({
+      icon: "warning",
+      title: "Session expired or Login required!",
+    });
+    setTimeout(() => {
+      window.location.href = "/login/";
+    }, 1500);
+  }
+
+  let alertsCache = {};
+
+  async function fetchAlerts() {
+    const container = document.getElementById("alertContainer");
+    try {
+      const headers = await getHeaders();
+      // Original URL without trailing slash
+      const res = await fetch("/api/emergency", { headers: headers });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-12 rounded-2xl border border-gray-100 text-center shadow-sm">
+            <h3 class="text-gray-600 font-bold text-base">No active emergencies reported.</h3>
+            <p class="text-gray-400 text-xs mt-1">Your neighborhood is currently safe.</p>
+          </div>`;
+        return;
+      }
+
+      alertsCache = {};
+      container.innerHTML = "";
+      data.forEach((item) => {
+        alertsCache[item.id] = item;
+        container.innerHTML += `
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-red-200 transition">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="bg-red-100 text-red-600 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">${item.type}</span>
+                <span class="text-xs text-gray-400">📍 ${item.location}</span>
+              </div>
+              <h4 class="font-bold text-gray-900 text-base">${item.title}</h4>
+              <p class="text-xs text-gray-500">${item.description || ""}</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <span class="text-xs font-bold px-3 py-1 rounded-lg ${item.severity === "High" ? "bg-red-600 text-white" : "bg-yellow-500 text-white"}">
+                ${item.severity}
+              </span>
+              
+              <div class="flex items-center gap-2">
+                <button onclick="editAlert('${item.id}')" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1 rounded-lg text-xs font-bold transition">
+                  ✏️ Edit
+                </button>
+                <button onclick="deleteAlert('${item.id}')" class="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1 rounded-lg text-xs font-bold transition">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          </div>`;
+      });
+    } catch (e) {
+      console.error("Error fetching alerts:", e);
+    }
+  }
+
+  function openCreateModal() {
+    document.getElementById("editId").value = "";
+    document.getElementById("modalTitle").innerText = "🚨 Report New Emergency";
+    document.getElementById("submitBtn").innerText = "Submit Report";
+    document.getElementById("emergencyForm").reset();
+    document.getElementById("reportModal").classList.remove("hidden");
+  }
+
+  function closeModal() {
+    document.getElementById("reportModal").classList.add("hidden");
+    document.getElementById("emergencyForm").reset();
+  }
+
+  function editAlert(id) {
+    const item = alertsCache[id];
+    if (!item) return;
+
+    document.getElementById("editId").value = item.id;
+    document.getElementById("type").value = item.type || "Fire";
+    document.getElementById("title").value = item.title || "";
+    document.getElementById("description").value = item.description || "";
+    document.getElementById("location").value = item.location || "";
+    document.getElementById("latitude").value = item.latitude || "";
+    document.getElementById("longitude").value = item.longitude || "";
+    document.getElementById("severity").value = item.severity || "High";
+
+    document.getElementById("modalTitle").innerText =
+      "✏️ Update Emergency Alert";
+    document.getElementById("submitBtn").innerText = "Update Alert";
+    document.getElementById("reportModal").classList.remove("hidden");
+  }
+
+  async function deleteAlert(id) {
+    const confirmResult = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
+    try {
+      const headers = await getHeaders();
+      const res = await fetch(`/api/emergency/${id}`, {
+        method: "DELETE",
+        headers: headers,
+      });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (res.ok || res.status === 204 || res.status === 200) {
+        Toast.fire({
+          icon: "success",
+          title: "Alert deleted successfully!",
+        });
+        fetchAlerts();
+      } else {
+        Toast.fire({
+          icon: "error",
+          title: `Failed to delete (Status ${res.status})`,
+        });
+      }
+    } catch (e) {
+      Toast.fire({
+        icon: "error",
+        title: "Error deleting alert: " + e.message,
+      });
+    }
+  }
+
+  document
+    .getElementById("emergencyForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const editId = document.getElementById("editId").value;
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.innerText = editId ? "Updating..." : "Submitting...";
+      submitBtn.disabled = true;
+
+      const payload = {
+        type: document.getElementById("type").value,
+        title: document.getElementById("title").value,
+        description: document.getElementById("description").value,
+        location: document.getElementById("location").value,
+        latitude:
+          parseFloat(document.getElementById("latitude").value) || 22.3569,
+        longitude:
+          parseFloat(document.getElementById("longitude").value) || 91.7832,
+        severity: document.getElementById("severity").value,
+      };
+
+      const url = editId ? `/api/emergency/${editId}` : "/api/emergency";
+      const method = editId ? "PUT" : "POST";
+
+      try {
+        const headers = await getHeaders();
+        const res = await fetch(url, {
+          method: method,
+          headers: headers,
+          body: JSON.stringify(payload),
+        });
+
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+
+        if (res.ok) {
+          closeModal();
+          await fetchAlerts();
+          Toast.fire({
+            icon: "success",
+            title: editId
+              ? "Alert updated successfully!"
+              : "🚨 Emergency reported successfully!",
+          });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: `Action failed (Status ${res.status})`,
+          });
+        }
+      } catch (err) {
+        Toast.fire({
+          icon: "error",
+          title: "Network error, please try again.",
+        });
+      } finally {
+        submitBtn.innerText = editId ? "Update Alert" : "Submit Report";
+        submitBtn.disabled = false;
+      }
+    });
+
+  fetchAlerts();
+</script>
+{% endblock %}

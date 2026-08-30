@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+<!--  -->
+{% block title %}Dashboard - NeighborAlert BD{% endblock %}
+<!--  -->
+{% block content %}
+<div class="max-w-6xl mx-auto my-8 px-4 space-y-8">
+  <!-- Top Bar -->
+  <div
+    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+  >
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">
+        📊 Safety Incident Dashboard
+      </h2>
+      <p class="text-sm text-gray-500 mt-1">
+        Overview of emergency reports and community activities across
+        Bangladesh.
+      </p>
+    </div>
+    <a
+      href="{% url 'home' %}"
+      class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition"
+    >
+      + Report Incident
+    </a>
+  </div>
+
+  <!-- Analytics Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between"
+    >
+      <div>
+        <p class="text-xs font-bold text-gray-400 uppercase">Total Incidents</p>
+        <h3 id="statTotal" class="text-2xl font-black text-gray-800 mt-1">0</h3>
+      </div>
+      <div
+        class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center text-xl"
+      >
+        🚨
+      </div>
+    </div>
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between"
+    >
+      <div>
+        <p class="text-xs font-bold text-gray-400 uppercase">High Severity</p>
+        <h3 id="statHigh" class="text-2xl font-black text-red-600 mt-1">0</h3>
+      </div>
+      <div
+        class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl"
+      >
+        🔥
+      </div>
+    </div>
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between"
+    >
+      <div>
+        <p class="text-xs font-bold text-gray-400 uppercase">Active Alerts</p>
+        <h3 id="statActive" class="text-2xl font-black text-yellow-600 mt-1">
+          0
+        </h3>
+      </div>
+      <div
+        class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl"
+      >
+        ⚡
+      </div>
+    </div>
+    <div
+      class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between"
+    >
+      <div>
+        <p class="text-xs font-bold text-gray-400 uppercase">Community Posts</p>
+        <h3 id="statPosts" class="text-2xl font-black text-blue-600 mt-1">0</h3>
+      </div>
+      <div
+        class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl"
+      >
+        📢
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Data Table -->
+  <div
+    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+  >
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-bold text-gray-900 text-lg">Recent Emergency Logs</h3>
+      <span class="text-xs text-gray-400">Real-time DB Sync</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="bg-gray-50 text-gray-500 uppercase text-[11px] tracking-wider font-bold border-b border-gray-100"
+          >
+            <th class="p-4">Type</th>
+            <th class="p-4">Title</th>
+            <th class="p-4">Location</th>
+            <th class="p-4">Severity</th>
+            <th class="p-4">Status</th>
+          </tr>
+        </thead>
+        <tbody
+          id="dashTableBody"
+          class="text-xs text-gray-700 divide-y divide-gray-100"
+        >
+          <tr>
+            <td colspan="5" class="p-4 text-center text-gray-400">
+              Loading incident records...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function loadDashboardData() {
+    try {
+      const [alertRes, postRes] = await Promise.all([
+        fetch("/api/emergency"),
+        fetch("/api/posts"),
+      ]);
+
+      const alerts = await alertRes.json();
+      const posts = await postRes.json();
+
+      // Stats Update
+      if (Array.isArray(alerts)) {
+        document.getElementById("statTotal").innerText = alerts.length;
+        document.getElementById("statHigh").innerText = alerts.filter(
+          (a) => a.severity === "High",
+        ).length;
+        document.getElementById("statActive").innerText = alerts.filter(
+          (a) => a.status !== "Resolved",
+        ).length;
+      }
+
+      if (Array.isArray(posts)) {
+        document.getElementById("statPosts").innerText = posts.length;
+      }
+
+      // Table Update
+      const tbody = document.getElementById("dashTableBody");
+      tbody.innerHTML = "";
+
+      if (!Array.isArray(alerts) || alerts.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="5" class="p-4 text-center text-gray-400">No reported logs found in database.</td></tr>';
+        return;
+      }
+
+      alerts.forEach((item) => {
+        let badgeClass =
+          item.severity === "High"
+            ? "bg-red-100 text-red-700"
+            : "bg-yellow-100 text-yellow-700";
+        tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4 font-bold text-gray-900">${item.type}</td>
+                        <td class="p-4">${item.title}</td>
+                        <td class="p-4">📍 ${item.location}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full font-bold ${badgeClass}">${item.severity}</span></td>
+                        <td class="p-4 font-semibold text-gray-600">${item.status || "Pending"}</td>
+                    </tr>
+                `;
+      });
+    } catch (e) {
+      console.error("Dashboard Error:", e);
+    }
+  }
+
+  loadDashboardData();
+</script>
+{% endblock %}
