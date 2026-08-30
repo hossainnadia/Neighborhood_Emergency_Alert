@@ -149,3 +149,6 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Login Redirect Settings (লগইন করা না থাকলে রিডায়রেক্ট করার জন্য)
+LOGIN_URL = '/admin/login/'

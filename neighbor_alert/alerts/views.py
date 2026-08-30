@@ -1,35 +1,55 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+from django.shortcuts import render
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import render
-from django.contrib.auth import get_user_model
-from .models import Emergency, Post, Comment
-from .serializers import EmergencySerializer, PostSerializer, UserSerializer, RegisterSerializer, CommentSerializer
+
+from .models import Comment, Emergency, Post
+from .serializers import (
+    CommentSerializer,
+    EmergencySerializer,
+    PostSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
 
 User = get_user_model()
+
 
 # ================= UI Views =================
 def home_view(request):
     return render(request, 'home.html')
 
-def alerts_view(request):
-    return render(request, 'alert.html')
-
-def community_view(request):
-    return render(request, 'community.html')
-
-def map_view(request):
-    return render(request, 'map.html')
-
-def dashboard_view(request):
-    return render(request, 'dashboard.html')
 
 def login_view(request):
     return render(request, 'login.html')
 
+
 def register_view(request):
     return render(request, 'register.html')
+
+
+# নিচের ভিউগুলোতে `@login_required` যুক্ত করা হয়েছে, ফলে লগইন ছাড়া কেউ ঢুকতে পারবে না
+@login_required
+def alerts_view(request):
+    return render(request, 'alert.html')
+
+
+@login_required
+def community_view(request):
+    return render(request, 'community.html')
+
+
+@login_required
+def map_view(request):
+    return render(request, 'map.html')
+
+
+@login_required
+def dashboard_view(request):
+    return render(request, 'dashboard.html')
 
 
 # ================= API Views =================
@@ -41,17 +61,22 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
-        return Response({
-            'user': UserSerializer(user).data,
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                'user': UserSerializer(user).data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ProfileView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED
+            )
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
@@ -66,7 +91,9 @@ class EmergencyListCreateView(generics.ListCreateAPIView):
         else:
             user = User.objects.first()
             if not user:
-                user = User.objects.create_user(username='anonymous_user', password='password123')
+                user = User.objects.create_user(
+                    username='anonymous_user', password='password123'
+                )
         serializer.save(user=user)
 
 
@@ -80,17 +107,21 @@ class IoTEmergencyTriggerView(APIView):
         data = request.data
         default_user = User.objects.first()
         if not default_user:
-            default_user = User.objects.create_user(username='iot_device', password='password123')
-            
+            default_user = User.objects.create_user(
+                username='iot_device', password='password123'
+            )
+
         alert = Emergency.objects.create(
             user=default_user,
             type=data.get('type', 'Fire'),
             title=data.get('title', 'IoT Sensor Emergency Alert'),
-            description=data.get('description', 'Abnormal conditions detected by IoT sensor.'),
+            description=data.get(
+                'description', 'Abnormal conditions detected by IoT sensor.'
+            ),
             location=data.get('location', 'Sensor Location'),
             severity=data.get('severity', 'High'),
             status='Pending',
-            is_iot_triggered=True
+            is_iot_triggered=True,
         )
         serializer = EmergencySerializer(alert)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -106,7 +137,9 @@ class PostListCreateView(generics.ListCreateAPIView):
         else:
             user = User.objects.first()
             if not user:
-                user = User.objects.create_user(username='anonymous_user', password='password123')
+                user = User.objects.create_user(
+                    username='anonymous_user', password='password123'
+                )
         serializer.save(user=user)
 
 
@@ -132,7 +165,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
         else:
             user = User.objects.first()
             if not user:
-                user = User.objects.create_user(username='anonymous_user', password='password123')
+                user = User.objects.create_user(
+                    username='anonymous_user', password='password123'
+                )
         serializer.save(user=user)
 
 
