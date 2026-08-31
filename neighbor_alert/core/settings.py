@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,12 +70,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database
+# Database (Environment Variable থেকে Neon PostgreSQL কানেকশন নেওয়া হলো)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.parse(
+        os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 
@@ -150,5 +152,5 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Login Redirect Settings (লগইন করা না থাকলে রিডায়রেক্ট করার জন্য)
+# Login Redirect Settings (লগইন করা না থাকলে রিডায়রেক্ট করার জন্য)
 LOGIN_URL = '/login/'
