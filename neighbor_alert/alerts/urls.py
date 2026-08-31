@@ -1,9 +1,10 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     CommentDetailView,
     CommentListCreateView,
+    CustomTokenObtainPairView,
     EmergencyDetailView,
     EmergencyListCreateView,
     IoTEmergencyTriggerView,
@@ -30,25 +31,25 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard_page'),
     path('login/', login_view, name='login_page'),
     path('register/', register_view, name='register_page'),
-    path('logout/', logout_view, name='logout_page'),  # লগআউট রাউট যুক্ত করা হলো
+    path('logout/', logout_view, name='logout_page'),
 
     # ================= REST & Auth APIs =================
     # Auth APIs
-    path('api/auth/register', RegisterView.as_view(), name='auth_register'),
-    path('api/auth/login', TokenObtainPairView.as_view(), name='auth_login'),
-    path('api/auth/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/auth/profile', ProfileView.as_view(), name='auth_profile'),
+    path('api/auth/register/', RegisterView.as_view(), name='auth_register'),
+    path('api/auth/login/', CustomTokenObtainPairView.as_view(), name='auth_login'),
+    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/auth/profile/', ProfileView.as_view(), name='auth_profile'),
 
-    # Emergency APIs
-    path('api/emergency', EmergencyListCreateView.as_view(), name='emergency_list'),
-    path('api/emergency/<uuid:pk>', EmergencyDetailView.as_view(), name='emergency_detail'),
-    path('api/emergency/iot-trigger', IoTEmergencyTriggerView.as_view(), name='iot_trigger'),
+    # Emergency APIs (iot-trigger কে অবশ্যই <uuid:pk> এর ওপরে রাখতে হবে)
+    path('api/emergency/iot-trigger/', IoTEmergencyTriggerView.as_view(), name='iot_trigger'),
+    path('api/emergency/', EmergencyListCreateView.as_view(), name='emergency_list'),
+    path('api/emergency/<uuid:pk>/', EmergencyDetailView.as_view(), name='emergency_detail'),
 
     # Community APIs
-    path('api/posts', PostListCreateView.as_view(), name='post_list'),
-    path('api/posts/<uuid:pk>', PostDetailView.as_view(), name='post_detail'),
+    path('api/posts/', PostListCreateView.as_view(), name='post_list'),
+    path('api/posts/<uuid:pk>/', PostDetailView.as_view(), name='post_detail'),
 
     # Comment APIs
-    path('api/comments', CommentListCreateView.as_view(), name='comment_list'),
-    path('api/comments/<uuid:pk>', CommentDetailView.as_view(), name='comment_detail'),
+    path('api/comments/', CommentListCreateView.as_view(), name='comment_list'),
+    path('api/comments/<uuid:pk>/', CommentDetailView.as_view(), name='comment_detail'),
 ]

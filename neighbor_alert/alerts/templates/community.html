@@ -1,95 +1,86 @@
 {% extends 'base.html' %}
 <!--  -->
+{% block title %}Community Feed - NeighborAlert{% endblock %}
+<!--  -->
 {% block content %}
-<!-- SweetAlert2 CDN Notification Alert-এর জন্য -->
+<!-- SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<div class="max-w-6xl mx-auto my-8 px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-  <!-- Sidebar -->
-  <div class="space-y-6">
-    <button
-      onclick="openModal(false)"
-      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow transition"
-    >
-      ➕ Create New Post
-    </button>
-
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 class="font-bold text-gray-900 mb-4">Categories</h3>
-      <ul class="space-y-2 text-sm font-medium text-gray-600">
-        <li
-          onclick="filterCategory('All')"
-          class="hover:text-blue-600 cursor-pointer font-bold text-blue-600"
-        >
-          🌐 All Posts
-        </li>
-        <li
-          onclick="filterCategory('Help')"
-          class="hover:text-blue-600 cursor-pointer"
-        >
-          🆘 Help Needed
-        </li>
-        <li
-          onclick="filterCategory('LostFound')"
-          class="hover:text-blue-600 cursor-pointer"
-        >
-          🔎 Lost & Found
-        </li>
-        <li
-          onclick="filterCategory('Announcement')"
-          class="hover:text-blue-600 cursor-pointer"
-        >
-          📣 Local Announcement
-        </li>
-        <li
-          onclick="filterCategory('Event')"
-          class="hover:text-blue-600 cursor-pointer"
-        >
-          🎉 Community Event
-        </li>
-        <li
-          onclick="filterCategory('Issue')"
-          class="hover:text-blue-600 cursor-pointer"
-        >
-          🏠 Neighborhood Issue
-        </li>
-        <li
-          onclick="filterCategory('General')"
-          class="hover:text-blue-600 cursor-pointer"
-        >
-          💡 General Discussion
-        </li>
-      </ul>
+<div class="max-w-4xl mx-auto my-10 px-4 space-y-8">
+  <!-- Hero / Header Section -->
+  <div
+    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 border border-slate-700/50"
+  >
+    <div class="space-y-2 text-center md:text-left">
+      <span
+        class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider"
+        >Neighborhood Network</span
+      >
+      <h2 class="text-3xl font-black tracking-tight">Community Discussion</h2>
+      <p class="text-xs text-gray-300 max-w-lg leading-relaxed">
+        Share local updates, notices, and safety announcements with your
+        neighbors.
+      </p>
     </div>
+    <button
+      onclick="openPostModal()"
+      class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-2xl text-sm transition shadow-lg shadow-red-600/30 flex items-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        ></path>
+      </svg>
+      Create New Post
+    </button>
   </div>
 
-  <!-- Feed -->
-  <div class="md:col-span-2 space-y-4">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-2xl font-bold text-gray-900">📢 Community Board</h3>
-      <span
-        id="activeCatLabel"
-        class="text-xs font-semibold bg-gray-200 text-gray-700 px-3 py-1 rounded-full"
-        >All Posts</span
-      >
-    </div>
-    <div id="communityFeed" class="space-y-4">
-      <p class="text-gray-500">Loading posts...</p>
+  <!-- Post Feed Container -->
+  <div id="postContainer" class="space-y-6">
+    <div
+      class="bg-white p-12 rounded-3xl border border-gray-100 text-center shadow-sm"
+    >
+      <div
+        class="animate-spin w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full mx-auto mb-3"
+      ></div>
+      <p class="text-gray-400 text-xs font-semibold">
+        Loading community posts...
+      </p>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Create / Edit Post Modal -->
 <div
   id="postModal"
-  class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4"
+  class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition duration-300"
 >
-  <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
-    <h3 id="modalTitle" class="text-xl font-bold text-gray-900 mb-4">
-      Create a Post
-    </h3>
-    <form id="createPostForm" class="space-y-4">
-      {% csrf_token %}
+  <div
+    class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-gray-100 space-y-6 transform transition-all"
+  >
+    <div
+      class="flex justify-between items-center border-b border-gray-100 pb-4"
+    >
+      <h3 id="postModalTitle" class="font-black text-xl text-gray-900">
+        📝 Create New Post
+      </h3>
+      <button
+        onclick="closePostModal()"
+        class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center font-bold transition cursor-pointer"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form id="postForm" class="space-y-4">
       <input type="hidden" id="editPostId" value="" />
 
       <div>
@@ -98,37 +89,28 @@
         >
         <select
           id="postCategory"
-          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+          required
+          class="w-full border border-gray-200 rounded-2xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition"
         >
-          <option value="Help">Help Needed 🆘</option>
-          <option value="LostFound">Lost & Found 🔎</option>
-          <option value="Announcement">Local Announcement 📣</option>
-          <option value="Event">Community Event 🎉</option>
-          <option value="Issue">Neighborhood Issue 🏠</option>
-          <option value="General" selected>General Discussion 💡</option>
+          <option value="General">💡 General Discussion</option>
+          <option value="Help">🆘 Help Needed</option>
+          <option value="LostFound">🔎 Lost & Found</option>
+          <option value="Announcement">📣 Local Announcement</option>
+          <option value="Event">🎉 Community Event</option>
+          <option value="Issue">🏠 Neighborhood Issue</option>
         </select>
       </div>
 
       <div>
         <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-          >Title</label
+          >Post Title</label
         >
         <input
           type="text"
           id="postTitle"
           required
-          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
-        />
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-          >Location</label
-        >
-        <input
-          type="text"
-          id="postLocation"
-          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+          placeholder="e.g., Water supply notice in block 4..."
+          class="w-full border border-gray-200 rounded-2xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition"
         />
       </div>
 
@@ -138,326 +120,356 @@
         >
         <textarea
           id="postContent"
-          rows="4"
           required
-          class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none"
+          rows="4"
+          placeholder="Write details about your post..."
+          class="w-full border border-gray-200 rounded-2xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition"
         ></textarea>
       </div>
 
-      <div class="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onclick="closeModal()"
-          class="px-5 py-2.5 rounded-xl border text-gray-600 text-sm"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          id="savePostBtn"
-          class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
-        >
-          Save Post
-        </button>
-      </div>
+      <button
+        type="submit"
+        id="postSubmitBtn"
+        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg shadow-red-600/30 cursor-pointer"
+      >
+        Publish Post
+      </button>
     </form>
   </div>
 </div>
 
 <script>
-  let currentPosts = [];
-  let currentUser = null;
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+  });
 
-  const categoryLabels = {
-    Help: "🆘 Help Needed",
-    LostFound: "🔎 Lost & Found",
-    Announcement: "📣 Announcement",
-    Event: "🎉 Event",
-    Issue: "🏠 Issue",
-    General: "💡 General",
-  };
-
-  // Toast Notification Function
-  function showNotification(icon, title) {
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon: icon,
-      title: title,
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-    });
-  }
-
-  function openModal(isEdit = false, postId = null) {
-    const modal = document.getElementById("postModal");
-    const modalTitle = document.getElementById("modalTitle");
-    const editPostId = document.getElementById("editPostId");
-
-    if (isEdit && postId) {
-      modalTitle.innerText = "Edit Post";
-      editPostId.value = postId;
-      const post = currentPosts.find((p) => p.id === postId);
-      if (post) {
-        document.getElementById("postCategory").value =
-          post.category || "General";
-        document.getElementById("postTitle").value = post.title || "";
-        document.getElementById("postLocation").value = post.location || "";
-        document.getElementById("postContent").value = post.content || "";
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
       }
-    } else {
-      modalTitle.innerText = "Create a Post";
-      editPostId.value = "";
-      document.getElementById("createPostForm").reset();
     }
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+    return cookieValue;
   }
 
-  function closeModal() {
-    const modal = document.getElementById("postModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-  }
+  async function getValidToken() {
+    let token = localStorage.getItem("access_token");
+    const refresh = localStorage.getItem("refresh_token");
 
-  async function makeApiRequest(url, method = "GET", body = null) {
-    const options = {
-      method: method,
-      headers: { "Content-Type": "application/json" },
-    };
-    const token = localStorage.getItem("access_token");
-    if (token) options.headers["Authorization"] = `Bearer ${token}`;
-    if (body) options.body = JSON.stringify(body);
-
-    if (typeof apiFetch === "function") {
-      return await apiFetch(url, options);
+    if (!token && refresh) {
+      try {
+        const res = await fetch("/api/auth/token/refresh/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh: refresh }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("access_token", data.access);
+          token = data.access;
+        } else {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+        }
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+      }
     }
-    return await fetch(url, options);
+    return token;
   }
 
-  async function getCurrentUser() {
+  async function getHeaders() {
+    const headers = { "Content-Type": "application/json" };
+    const csrfToken = getCookie("csrftoken");
+    if (csrfToken) headers["X-CSRFToken"] = csrfToken;
+
+    const token = await getValidToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    return headers;
+  }
+
+  function handleUnauthorized() {
+    Toast.fire({ icon: "warning", title: "Please login first!" });
+    setTimeout(() => {
+      window.location.href = "/login/";
+    }, 1500);
+  }
+
+  let postsCache = {};
+
+  async function fetchPosts() {
+    const container = document.getElementById("postContainer");
     try {
-      const res = await makeApiRequest("/api/auth/profile");
-      if (res.ok) {
-        currentUser = await res.json();
+      const headers = await getHeaders();
+      const res = await fetch("/api/posts/", { headers: headers });
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-12 rounded-3xl border border-gray-100 text-center shadow-sm space-y-2">
+            <div class="text-4xl">📭</div>
+            <h3 class="text-gray-800 font-bold text-base">No discussions found</h3>
+            <p class="text-gray-400 text-xs">Be the first neighbor to spark a conversation.</p>
+          </div>`;
+        return;
       }
-    } catch (e) {
-      console.log("Not logged in");
-    }
-  }
 
-  async function loadCommunity() {
-    try {
-      if (!currentUser) await getCurrentUser();
+      postsCache = {};
+      container.innerHTML = "";
 
-      const res = await makeApiRequest("/api/posts");
-      if (res.ok) {
-        currentPosts = await res.json();
-        renderPosts(currentPosts);
-      } else {
-        document.getElementById("communityFeed").innerHTML =
-          `<p class="text-red-500 text-sm">Error loading posts (${res.status})</p>`;
-      }
-    } catch (err) {
-      document.getElementById("communityFeed").innerHTML =
-        `<p class="text-red-500 text-sm">Failed to connect to server.</p>`;
-    }
-  }
+      for (const post of data) {
+        postsCache[post.id] = post;
 
-  function renderPosts(posts) {
-    const container = document.getElementById("communityFeed");
-    container.innerHTML = "";
+        let commentsHtml = "";
+        let commentsList = post.comments || [];
 
-    if (!Array.isArray(posts) || posts.length === 0) {
-      container.innerHTML = `<p class="text-gray-400 italic bg-white p-6 rounded-2xl border text-center text-sm">No posts found.</p>`;
-      return;
-    }
+        if (commentsList.length > 0) {
+          commentsList.forEach((c) => {
+            const commenterName = c.user_username || "Resident";
+            commentsHtml += `
+              <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    ${commenterName}
+                  </span>
+                  <span class="text-[10px] text-slate-400">${new Date(c.created_at).toLocaleDateString()}</span>
+                </div>
+                <p class="text-slate-600 text-xs pl-3.5">${c.text}</p>
+              </div>`;
+          });
+        } else {
+          commentsHtml = `<p class="text-[11px] text-slate-400 italic py-1">No comments yet. Join the conversation!</p>`;
+        }
 
-    posts.forEach((post) => {
-      const catBadge =
-        categoryLabels[post.category] || post.category || "General";
-      const isOwner =
-        currentUser &&
-        post.user_details &&
-        currentUser.id === post.user_details.id;
+        const authorName = post.user_details
+          ? post.user_details.username
+          : "Resident";
 
-      const actionButtons = isOwner
-        ? `
-        <div class="flex items-center gap-2">
-          <button onclick="openModal(true, '${post.id}')" class="text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 font-semibold px-3 py-1.5 rounded-lg border border-amber-200 transition">✏️ Edit</button>
-          <button onclick="deletePost('${post.id}')" class="text-xs bg-red-50 text-red-600 hover:bg-red-100 font-semibold px-3 py-1.5 rounded-lg border border-red-200 transition">🗑️ Delete</button>
-        </div>
-      `
-        : "";
-
-      // Comments List Builder
-      const commentsList =
-        post.comments && post.comments.length > 0
-          ? post.comments
-              .map(
-                (c) => `
-            <div class="bg-gray-50 p-2.5 rounded-xl text-xs border border-gray-100">
-              <span class="font-bold text-gray-800">${c.user_username || "User"}:</span>
-              <span class="text-gray-700">${c.text}</span>
-            </div>
-          `,
-              )
-              .join("")
-          : `<p class="text-gray-400 text-xs italic">No comments yet.</p>`;
-
-      container.innerHTML += `
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition space-y-4">
-          <div>
-            <div class="flex justify-between items-center mb-3">
-              <span class="text-xs px-3 py-1 bg-blue-100 text-blue-800 font-semibold rounded-full">${catBadge}</span>
-              <div class="flex items-center gap-3">
-                <span class="text-xs text-gray-400">📍 ${post.location || "Area"}</span>
-                ${actionButtons}
+        container.innerHTML += `
+          <div class="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition duration-300 space-y-5">
+            <div class="flex justify-between items-start">
+              <div class="space-y-1.5">
+                <span class="bg-red-50 text-red-600 border border-red-100 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">${post.category}</span>
+                <h4 class="font-extrabold text-gray-900 text-lg tracking-tight mt-1">${post.title}</h4>
+                <div class="flex items-center gap-2 text-xs text-gray-400">
+                  <span class="font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">@${authorName}</span>
+                  <span>•</span>
+                  <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="editPost('${post.id}')" class="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold transition cursor-pointer" title="Edit Post">✏️</button>
+                <button onclick="deletePost('${post.id}')" class="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold transition cursor-pointer" title="Delete Post">🗑️</button>
               </div>
             </div>
-            <h4 class="text-xl font-bold text-gray-900 mb-2">${post.title}</h4>
-            <p class="text-gray-600 text-sm mb-2 leading-relaxed">${post.content}</p>
-            <p class="text-xs text-gray-400">Posted by: <span class="font-medium text-gray-700">${post.user_details ? post.user_details.username : "Anonymous"}</span></p>
-          </div>
 
-          <!-- Comment Section -->
-          <div class="border-t pt-4 space-y-3">
-            <h5 class="text-xs font-bold text-gray-700 flex items-center gap-1">💬 Comments (${post.comments ? post.comments.length : 0})</h5>
+            <p class="text-xs text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-2xl border border-gray-100/80">${post.content}</p>
             
-            <div class="space-y-2 max-h-40 overflow-y-auto">
-              ${commentsList}
+            <!-- Comment Section -->
+            <div class="border-t border-gray-100 pt-4 space-y-3">
+              <h5 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                💬 Comments (${commentsList.length})
+              </h5>
+              
+              <div class="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                ${commentsHtml}
+              </div>
+
+              <!-- Comment Input Form -->
+              <form onsubmit="submitComment(event, '${post.id}')" class="flex gap-2 pt-2">
+                <input 
+                  type="text" 
+                  id="commentInput_${post.id}" 
+                  placeholder="Write a helpful comment..." 
+                  required 
+                  class="flex-1 border border-gray-200 rounded-2xl px-4 py-2.5 text-xs bg-gray-50 focus:ring-2 focus:ring-red-500 focus:bg-white outline-none transition" 
+                />
+                <button 
+                  type="submit" 
+                  class="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-sm cursor-pointer"
+                >
+                  Reply
+                </button>
+              </form>
             </div>
-
-            <!-- Add Comment Form -->
-            <form onsubmit="submitComment(event, '${post.id}')" class="flex gap-2 pt-1">
-              <input 
-                type="text" 
-                id="comment-input-${post.id}" 
-                required 
-                placeholder="Write a comment..." 
-                class="w-full border rounded-xl px-3 py-2 text-xs bg-gray-50 outline-none focus:ring-1 focus:ring-blue-500" 
-              />
-              <button 
-                type="submit" 
-                class="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl text-xs font-bold transition shrink-0"
-              >
-                Send
-              </button>
-            </form>
-          </div>
-        </div>
-      `;
-    });
-  }
-
-  // SUBMIT Comment Function
-  async function submitComment(event, postId) {
-    event.preventDefault();
-    const input = document.getElementById(`comment-input-${postId}`);
-    const text = input.value.trim();
-    if (!text) return;
-
-    try {
-      const res = await makeApiRequest("/api/comments", "POST", {
-        post: postId,
-        text: text,
-      });
-
-      if (res.ok) {
-        input.value = "";
-        showNotification("success", "Comment added!");
-        loadCommunity();
-      } else {
-        showNotification("error", "Failed to add comment.");
+          </div>`;
       }
-    } catch (err) {
-      showNotification("error", "Network Error!");
+    } catch (e) {
+      console.error("Error fetching posts:", e);
     }
   }
 
-  function filterCategory(cat) {
-    document.getElementById("activeCatLabel").innerText =
-      categoryLabels[cat] || cat;
-    if (cat === "All") renderPosts(currentPosts);
-    else renderPosts(currentPosts.filter((p) => p.category === cat));
+  async function submitComment(event, postId) {
+    event.preventDefault();
+    const inputField = document.getElementById(`commentInput_${postId}`);
+    const commentText = inputField.value;
+
+    try {
+      const headers = await getHeaders();
+      const res = await fetch("/api/comments/", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ post: postId, text: commentText }),
+      });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (res.ok) {
+        inputField.value = "";
+        Toast.fire({ icon: "success", title: "Comment posted!" });
+        fetchPosts();
+      } else {
+        Toast.fire({ icon: "error", title: "Failed to post comment." });
+      }
+    } catch (err) {
+      Toast.fire({ icon: "error", title: "Network error." });
+    }
   }
 
-  // DELETE Post Function With Alert
-  async function deletePost(postId) {
+  function openPostModal() {
+    document.getElementById("editPostId").value = "";
+    document.getElementById("postModalTitle").innerText = "📝 Create New Post";
+    document.getElementById("postSubmitBtn").innerText = "Publish Post";
+    document.getElementById("postForm").reset();
+    document.getElementById("postModal").classList.remove("hidden");
+  }
+
+  function closePostModal() {
+    document.getElementById("postModal").classList.add("hidden");
+    document.getElementById("postForm").reset();
+  }
+
+  function editPost(id) {
+    const post = postsCache[id];
+    if (!post) return;
+
+    document.getElementById("editPostId").value = post.id;
+    document.getElementById("postCategory").value = post.category || "General";
+    document.getElementById("postTitle").value = post.title || "";
+    document.getElementById("postContent").value = post.content || "";
+
+    document.getElementById("postModalTitle").innerText = "✏️ Update Post";
+    document.getElementById("postSubmitBtn").innerText = "Update Post";
+    document.getElementById("postModal").classList.remove("hidden");
+  }
+
+  async function deletePost(id) {
     const confirmResult = await Swal.fire({
       title: "Are you sure?",
-      text: "You won't be able to revert this post!",
+      text: "You can only delete your own posts!",
       icon: "warning",
       showCancelButton: true,
-      confirmColor: "#d33",
-      cancelColor: "#3085d6",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
     });
 
-    if (confirmResult.isConfirmed) {
-      try {
-        const res = await makeApiRequest(`/api/posts/${postId}`, "DELETE");
-        if (res.ok) {
-          showNotification("success", "Post deleted successfully!");
-          loadCommunity();
-        } else {
-          showNotification("error", "Failed to delete post.");
-        }
-      } catch (err) {
-        showNotification("error", "Network error.");
+    if (!confirmResult.isConfirmed) return;
+
+    try {
+      const headers = await getHeaders();
+      const res = await fetch(`/api/posts/${id}/`, {
+        method: "DELETE",
+        headers: headers,
+      });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
       }
+      if (res.status === 403) {
+        Toast.fire({
+          icon: "error",
+          title: "Permission denied! You can only delete your own posts.",
+        });
+        return;
+      }
+
+      if (res.status === 204 || res.status === 200) {
+        Toast.fire({ icon: "success", title: "Post deleted successfully!" });
+        fetchPosts();
+      } else {
+        Toast.fire({ icon: "error", title: "Failed to delete post." });
+      }
+    } catch (e) {
+      Toast.fire({ icon: "error", title: "Network error occurred." });
     }
   }
 
-  // CREATE / UPDATE Form Handler With Alert
-  document
-    .getElementById("createPostForm")
-    .addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("savePostBtn");
-      const editPostId = document.getElementById("editPostId").value;
+  document.getElementById("postForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      btn.disabled = true;
-      btn.innerText = "Saving...";
+    const editId = document.getElementById("editPostId").value;
+    const submitBtn = document.getElementById("postSubmitBtn");
+    submitBtn.innerText = editId ? "Updating..." : "Publishing...";
+    submitBtn.disabled = true;
 
-      const payload = {
-        category: document.getElementById("postCategory").value,
-        title: document.getElementById("postTitle").value,
-        location: document.getElementById("postLocation").value,
-        content: document.getElementById("postContent").value,
-        status: "Active",
-      };
+    // মডেলের সাথে হুবহু মিলিয়ে category, title এবং content পাঠানো হচ্ছে
+    const payload = {
+      category: document.getElementById("postCategory").value,
+      title: document.getElementById("postTitle").value,
+      content: document.getElementById("postContent").value,
+    };
 
-      const isEdit = Boolean(editPostId);
-      const url = isEdit ? `/api/posts/${editPostId}` : "/api/posts";
-      const method = isEdit ? "PUT" : "POST";
+    const url = editId ? `/api/posts/${editId}/` : "/api/posts/";
+    const method = editId ? "PUT" : "POST";
 
-      try {
-        const res = await makeApiRequest(url, method, payload);
+    try {
+      const headers = await getHeaders();
+      const res = await fetch(url, {
+        method: method,
+        headers: headers,
+        body: JSON.stringify(payload),
+      });
 
-        if (res.ok) {
-          closeModal();
-          document.getElementById("createPostForm").reset();
-          showNotification(
-            "success",
-            isEdit
-              ? "Post updated successfully!"
-              : "Post published successfully!",
-          );
-          loadCommunity();
-        } else {
-          showNotification("error", "Failed to save post.");
-        }
-      } catch (err) {
-        showNotification("error", "Network Connection Error!");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Save Post";
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
       }
-    });
+      if (res.status === 403) {
+        Toast.fire({
+          icon: "error",
+          title: "Permission denied! You can only edit your own posts.",
+        });
+        return;
+      }
 
-  loadCommunity();
+      if (res.ok) {
+        closePostModal();
+        await fetchPosts();
+        Toast.fire({
+          icon: "success",
+          title: editId
+            ? "Post updated successfully!"
+            : "📝 Post published successfully!",
+        });
+      } else {
+        const errJson = await res.json();
+        console.error("Post error:", errJson);
+        Toast.fire({ icon: "error", title: "Failed to save post." });
+      }
+    } catch (err) {
+      Toast.fire({ icon: "error", title: "Network error occurred." });
+    } finally {
+      submitBtn.innerText = editId ? "Update Post" : "Publish Post";
+      submitBtn.disabled = false;
+    }
+  });
+
+  fetchPosts();
 </script>
 {% endblock %}

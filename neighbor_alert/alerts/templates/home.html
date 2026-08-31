@@ -18,25 +18,21 @@
         Stay Safe. <br /><span class="text-yellow-300">Stay Connected.</span>
       </h1>
       <p class="text-red-100 text-base md:text-lg max-w-xl">
-        Your neighborhood security network is in your hands. Instantly alert
-        your neighbors and emergency services during any crisis.
+        Your neighborhood security network is in your hands. Stay updated with
+        community notices and emergency alerts during any crisis.
       </p>
       <div class="pt-2 flex flex-wrap justify-center md:justify-start gap-4">
-        <button
-          onclick="
-            document
-              .getElementById('report-form-section')
-              .scrollIntoView({ behavior: 'smooth' })
-          "
-          class="bg-white text-red-600 hover:bg-red-50 font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5"
-        >
-          🚨 Report Emergency Now
-        </button>
         <a
           href="{% url 'map_page' %}"
-          class="bg-red-800/60 hover:bg-red-800 text-white font-semibold px-6 py-3 rounded-xl border border-red-400/30 transition"
+          class="bg-white text-red-600 hover:bg-red-50 font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5"
         >
           📍 View Live Map
+        </a>
+        <a
+          href="{% url 'community_page' %}"
+          class="bg-red-800/60 hover:bg-red-800 text-white font-semibold px-6 py-3 rounded-xl border border-red-400/30 transition"
+        >
+          📢 Community Notices
         </a>
       </div>
     </div>
@@ -96,137 +92,47 @@
 
 <!-- Main Container -->
 <div class="max-w-6xl mx-auto my-12 px-4 space-y-16">
-  <!-- 2. Main Work Area: Form + Live Feeds -->
-  <div id="report-form-section" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    <!-- Emergency Report Form -->
-    <div
-      class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 h-fit"
-    >
-      <h3 class="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-        🚨 Report Emergency
-      </h3>
-      <p class="text-xs text-gray-500 mb-4">
-        Fill out the form below if there is an incident in your area.
-      </p>
-
-      <form id="emergencyForm" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-            >Emergency Type</label
-          >
-          <select
-            id="empType"
-            class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
-          >
-            <option value="Fire">Fire 🔥</option>
-            <option value="Flood">Flood 🌧️</option>
-            <option value="Accident">Accident 🚗</option>
-            <option value="Crime">Crime 🚨</option>
-            <option value="Medical">Medical 🚑</option>
-            <option value="Other">Other ⚠️</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-            >Title</label
-          >
-          <input
-            type="text"
-            id="empTitle"
-            required
-            placeholder="e.g. Fire in Nearby Building"
-            class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
-          />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-            >Severity</label
-          >
-          <select
-            id="empSeverity"
-            class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
-          >
-            <option value="High">High 🔴</option>
-            <option value="Medium">Medium 🟠</option>
-            <option value="Low">Low 🟡</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-            >Location</label
-          >
-          <input
-            type="text"
-            id="empLocation"
-            required
-            placeholder="e.g. Road 4, Sector 7"
-            class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
-          />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
-            >Description</label
-          >
-          <textarea
-            id="empDesc"
-            rows="3"
-            required
-            placeholder="Provide details..."
-            class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
-          ></textarea>
-        </div>
-        <button
-          type="submit"
-          id="submitBtn"
-          class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-md"
+  <!-- Live Feeds Section -->
+  <div class="space-y-8">
+    <!-- Active Alerts -->
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <span class="relative flex h-3 w-3">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+            ></span>
+            <span
+              class="relative inline-flex rounded-full h-3 w-3 bg-red-500"
+            ></span>
+          </span>
+          Active Alerts
+        </h3>
+        <a
+          href="{% url 'alerts_page' %}"
+          class="text-sm font-semibold text-red-600 hover:underline"
+          >View All →</a
         >
-          Submit Emergency Alert
-        </button>
-      </form>
+      </div>
+      <div id="alertsFeed" class="space-y-4">
+        <p class="text-gray-400 text-sm">Loading active alerts...</p>
+      </div>
     </div>
 
-    <!-- Live Feeds -->
-    <div class="md:col-span-2 space-y-8">
-      <!-- Active Alerts -->
-      <div>
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <span class="relative flex h-3 w-3">
-              <span
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
-              ></span>
-              <span
-                class="relative inline-flex rounded-full h-3 w-3 bg-red-500"
-              ></span>
-            </span>
-            Active Alerts
-          </h3>
-          <a
-            href="{% url 'alerts_page' %}"
-            class="text-sm font-semibold text-red-600 hover:underline"
-            >View All →</a
-          >
-        </div>
-        <div id="alertsFeed" class="space-y-4">
-          <p class="text-gray-400 text-sm">Loading active alerts...</p>
-        </div>
+    <!-- Community Feed -->
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-900">
+          📢 Latest Community Notices
+        </h3>
+        <a
+          href="{% url 'community_page' %}"
+          class="text-sm font-semibold text-blue-600 hover:underline"
+          >View All →</a
+        >
       </div>
-
-      <!-- Community Feed -->
-      <div>
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-900">
-            📢 Latest Community Notices
-          </h3>
-          <a
-            href="{% url 'community_page' %}"
-            class="text-sm font-semibold text-blue-600 hover:underline"
-            >View All →</a
-          >
-        </div>
-        <div id="postsFeed" class="space-y-4">
-          <p class="text-gray-400 text-sm">Loading community posts...</p>
-        </div>
+      <div id="postsFeed" class="space-y-4">
+        <p class="text-gray-400 text-sm">Loading community posts...</p>
       </div>
     </div>
   </div>
@@ -254,7 +160,7 @@
         <h4 class="font-bold text-gray-900 mb-2">Instant Broadcast</h4>
         <p class="text-xs text-gray-500 leading-relaxed">
           Notifications are instantly sent to nearby residents as soon as an
-          alert is submitted.
+          alert is published.
         </p>
       </div>
       <div
@@ -302,54 +208,7 @@
     </div>
   </div>
 
-  <!-- 4. How It Works -->
-  <div class="bg-gray-50 p-8 md:p-12 rounded-3xl border border-gray-200">
-    <h2
-      class="text-2xl md:text-3xl font-extrabold text-gray-900 text-center mb-8"
-    >
-      How NeighborAlert Works
-    </h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-      <div class="space-y-3">
-        <div
-          class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-lg mx-auto shadow-md"
-        >
-          1
-        </div>
-        <h3 class="font-bold text-lg text-gray-900">1. Spot & Report</h3>
-        <p class="text-xs text-gray-500 max-w-xs mx-auto">
-          Report any fire, accident, or criminal activity quickly using the
-          emergency form.
-        </p>
-      </div>
-      <div class="space-y-3">
-        <div
-          class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-lg mx-auto shadow-md"
-        >
-          2
-        </div>
-        <h3 class="font-bold text-lg text-gray-900">2. Instant Alert</h3>
-        <p class="text-xs text-gray-500 max-w-xs mx-auto">
-          The platform instantly broadcasts the emergency details to all
-          registered neighbors.
-        </p>
-      </div>
-      <div class="space-y-3">
-        <div
-          class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-lg mx-auto shadow-md"
-        >
-          3
-        </div>
-        <h3 class="font-bold text-lg text-gray-900">3. Rapid Response</h3>
-        <p class="text-xs text-gray-500 max-w-xs mx-auto">
-          Community members assist each other and contact authorities for swift
-          action.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. Call To Action -->
+  <!-- 4. Call To Action -->
   <div
     class="bg-slate-900 text-white rounded-3xl p-8 md:p-12 text-center space-y-6 shadow-2xl relative overflow-hidden"
   >
@@ -371,7 +230,7 @@
   </div>
 </div>
 
-<!-- JavaScript to load dynamic feeds -->
+<!-- JavaScript to load dynamic feeds only -->
 <script>
   async function loadFeeds() {
     // Fetch Active Alerts
@@ -410,7 +269,7 @@
       }
     } catch (e) {
       document.getElementById("alertsFeed").innerHTML =
-        '<p class="text-red-500 text-sm">Failed to load alerts feed.</p>';
+        '<p class="text-gray-400 text-sm italic bg-white p-4 rounded-xl border border-gray-100">Unable to load live alerts at the moment.</p>';
     }
 
     // Fetch Community Posts
@@ -439,48 +298,9 @@
       }
     } catch (e) {
       document.getElementById("postsFeed").innerHTML =
-        '<p class="text-red-500 text-sm">Failed to load community posts.</p>';
+        '<p class="text-gray-400 text-sm italic bg-white p-4 rounded-xl border border-gray-100">Unable to load community notices at the moment.</p>';
     }
   }
-
-  // Submit Emergency Form
-  document
-    .getElementById("emergencyForm")
-    .addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("submitBtn");
-      btn.innerText = "Submitting...";
-      btn.disabled = true;
-
-      const payload = {
-        type: document.getElementById("empType").value,
-        title: document.getElementById("empTitle").value,
-        severity: document.getElementById("empSeverity").value,
-        location: document.getElementById("empLocation").value,
-        description: document.getElementById("empDesc").value,
-      };
-
-      try {
-        const res = await fetch("/api/emergency", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.ok) {
-          alert("Emergency alert posted successfully!");
-          document.getElementById("emergencyForm").reset();
-          loadFeeds();
-        } else {
-          alert("Failed to submit alert. Check backend validation.");
-        }
-      } catch (err) {
-        alert("Error connecting to backend.");
-      } finally {
-        btn.innerText = "Submit Emergency Alert";
-        btn.disabled = false;
-      }
-    });
 
   loadFeeds();
 </script>

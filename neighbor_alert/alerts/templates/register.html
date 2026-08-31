@@ -87,7 +87,7 @@
       };
 
       try {
-        const res = await fetch("/api/auth/register", {
+        const res = await fetch("/api/auth/register/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -97,9 +97,14 @@
           alert("Registration successful! Please login.");
           window.location.href = "{% url 'login_page' %}";
         } else {
-          alert(
-            "Registration failed. Check if username or email is already taken.",
-          );
+          const errData = await res.json();
+          let errorMsg = "Registration failed.";
+          if (errData.username) errorMsg = "Username: " + errData.username[0];
+          else if (errData.email) errorMsg = "Email: " + errData.email[0];
+          else if (errData.password)
+            errorMsg = "Password: " + errData.password[0];
+
+          alert(errorMsg);
         }
       } catch (err) {
         alert("Error connecting to backend server.");

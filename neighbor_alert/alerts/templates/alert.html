@@ -373,14 +373,14 @@
     return cookieValue;
   }
 
-  // Auto-refresh logic for Token
+  // Auto-refresh logic for Token (ইউআরএলে /api/auth/token/refresh/ সঠিক করা হলো)
   async function getValidToken() {
     let token = localStorage.getItem("access_token");
     const refresh = localStorage.getItem("refresh_token");
 
     if (!token && refresh) {
       try {
-        const res = await fetch("/api/token/refresh/", {
+        const res = await fetch("/api/auth/token/refresh/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refresh: refresh }),
@@ -389,6 +389,9 @@
         if (res.ok) {
           localStorage.setItem("access_token", data.access);
           token = data.access;
+        } else {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
         }
       } catch (err) {
         console.error("Token refresh failed:", err);
@@ -429,8 +432,8 @@
     const container = document.getElementById("alertContainer");
     try {
       const headers = await getHeaders();
-      // Original URL without trailing slash
-      const res = await fetch("/api/emergency", { headers: headers });
+      // ট্রেইলিং স্ল্যাশ / যুক্ত করা হলো যাতে জ্যাংগো রিডাইরেক্ট না করে
+      const res = await fetch("/api/emergency/", { headers: headers });
 
       if (res.status === 401) {
         handleUnauthorized();
@@ -531,7 +534,8 @@
 
     try {
       const headers = await getHeaders();
-      const res = await fetch(`/api/emergency/${id}`, {
+      // ইউআরএলের শেষে স্ল্যাশ / যুক্ত করা হলো
+      const res = await fetch(`/api/emergency/${id}/`, {
         method: "DELETE",
         headers: headers,
       });
@@ -583,7 +587,8 @@
         severity: document.getElementById("severity").value,
       };
 
-      const url = editId ? `/api/emergency/${editId}` : "/api/emergency";
+      // আপডেট হলে ID সহ এবং নতুন হলে স্ল্যাশসহ ইউআরএল সেট করা হলো
+      const url = editId ? `/api/emergency/${editId}/` : "/api/emergency/";
       const method = editId ? "PUT" : "POST";
 
       try {

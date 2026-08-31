@@ -3,6 +3,9 @@
 {% block title %}User Login - NeighborAlert BD{% endblock %}
 <!--  -->
 {% block content %}
+<!-- SweetAlert2 CDN নোটিফিকেশনের জন্য -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="min-h-[75vh] flex items-center justify-center py-12 px-4">
   <div
     class="max-w-md w-full bg-white p-8 rounded-3xl shadow-lg border border-gray-100 space-y-6"
@@ -14,15 +17,16 @@
       </p>
     </div>
 
-    <!-- Django ফর্ম ব্যবহারের জন্য মেথড POST এবং action দেওয়া হলো -->
-    <form method="POST" class="space-y-4">
-      {% csrf_token %} {% if form.errors %}
+    <!-- JavaScript দিয়ে হ্যান্ডেল করার জন্য ফর্ম আইডি দেওয়া হলো -->
+    <form id="loginForm" class="space-y-4">
+      {% csrf_token %}
+
       <div
-        class="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl text-center font-medium"
+        id="errorAlert"
+        class="hidden bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl text-center font-medium"
       >
         Invalid username or password. Please try again.
       </div>
-      {% endif %}
 
       <div>
         <label class="block text-xs font-bold text-gray-600 uppercase mb-1"
@@ -30,7 +34,7 @@
         >
         <input
           type="text"
-          name="username"
+          id="usernameInput"
           required
           placeholder="Enter username"
           class="w-full border rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
@@ -42,7 +46,7 @@
         >
         <input
           type="password"
-          name="password"
+          id="passwordInput"
           required
           placeholder="••••••••"
           class="w-full border rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-red-500 outline-none"
@@ -50,6 +54,7 @@
       </div>
       <button
         type="submit"
+        id="loginBtn"
         class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-md"
       >
         Sign In
@@ -66,4 +71,63 @@
     </p>
   </div>
 </div>
+
+<script>
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById("loginBtn");
+    const errorAlert = document.getElementById("errorAlert");
+    const username = document.getElementById("usernameInput").value.trim();
+    const password = document.getElementById("passwordInput").value;
+
+    errorAlert.classList.add("hidden");
+    btn.disabled = true;
+    btn.innerText = "Signing in...";
+
+    try {
+      // আপনার urls.py এ থাকা /api/auth/login/ রাউটে রিকোয়েস্ট পাঠানো হচ্ছে
+      const response = await fetch("/api/auth/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // সফলভাবে টোকেন লোকাল স্টোরেজে সেভ হচ্ছে
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: "Login successful!",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+
+        // ১.৫ সেকেন্ড পর কমিউনিটি পেজে পাঠিয়ে দেওয়া হবে
+        setTimeout(() => {
+          window.location.href = "/community/";
+        }, 1500);
+      } else {
+        errorAlert.classList.remove("hidden");
+        btn.disabled = false;
+        btn.innerText = "Sign In";
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      errorAlert.innerText = "Network error occurred. Please try again.";
+      errorAlert.classList.remove("hidden");
+      btn.disabled = false;
+      btn.innerText = "Sign In";
+    }
+  });
+</script>
 {% endblock %}

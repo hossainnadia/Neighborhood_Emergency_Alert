@@ -6,6 +6,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Comment, Emergency, Post
 from .serializers import (
@@ -19,10 +20,21 @@ from .serializers import (
 User = get_user_model()
 
 
+# ================= Custom Permission =================
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    শুধুমাত্র পোস্ট/অ্যালার্টের মালিক বা ক্রিয়েটর এডিট বা ডিলিট করতে পারবে।
+    অন্যরা শুধু দেখতে (GET) পারবে।
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.user == request.user
+
+
 # ================= UI Views =================
 def home_view(request):
     return render(request, 'home.html')
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -65,14 +77,32 @@ def dashboard_view(request):
     return render(request, 'dashboard.html')
 
 
-# ================= API Views =================
+# ================= API Views & Custom Login =================
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    API লগইনের সময় JWT টোকেন দেওয়ার পাশাপাশি Django Session ও Login একটিভ করবে,
+    যাতে টেমপ্লেট এবং API উভয় ক্ষেত্রেই ইউজার অথেন্টিকেটেড থাকে।
+    """
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            username = request.data.get('username')
+            password = request.data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+        return response
+
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        login(request, user)  # রেজিস্ট্রেশনের পরপরই সেশন লগইন চালু করা হলো
         refresh = RefreshToken.for_user(user)
         return Response(
             {
@@ -85,11 +115,9 @@ class RegisterView(generics.CreateAPIView):
 
 
 class ProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
-        if not request.user.is_authenticated:
-            return Response(
-                {'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED
-            )
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
@@ -97,25 +125,24 @@ class ProfileView(APIView):
 class EmergencyListCreateView(generics.ListCreateAPIView):
     queryset = Emergency.objects.all().order_by('-created_at')
     serializer_class = EmergencySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        if self.request.user and self.request.user.is_authenticated:
-            user = self.request.user
-        else:
-            user = User.objects.first()
-            if not user:
-                user = User.objects.create_user(
-                    username='anonymous_user', password='password123'
-                )
-        serializer.save(user=user)
+        if not self.request.user or not self.request.user.is_authenticated:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You must be logged in to create an emergency alert.")
+        serializer.save(user=self.request.user)
 
 
 class EmergencyDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Emergency.objects.all()
     serializer_class = EmergencySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 class IoTEmergencyTriggerView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         data = request.data
         default_user = User.objects.first()
@@ -143,27 +170,25 @@ class IoTEmergencyTriggerView(APIView):
 class PostListCreateView(generics.ListCreateAPIView):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        if self.request.user and self.request.user.is_authenticated:
-            user = self.request.user
-        else:
-            user = User.objects.first()
-            if not user:
-                user = User.objects.create_user(
-                    username='anonymous_user', password='password123'
-                )
-        serializer.save(user=user)
+        if not self.request.user or not self.request.user.is_authenticated:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You must be logged in to create a post.")
+        serializer.save(user=self.request.user)
 
 
 class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 # ================= Comment API Views =================
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         queryset = Comment.objects.all().order_by('-created_at')
@@ -173,17 +198,13 @@ class CommentListCreateView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        if self.request.user and self.request.user.is_authenticated:
-            user = self.request.user
-        else:
-            user = User.objects.first()
-            if not user:
-                user = User.objects.create_user(
-                    username='anonymous_user', password='password123'
-                )
-        serializer.save(user=user)
+        if not self.request.user or not self.request.user.is_authenticated:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You must be logged in to comment.")
+        serializer.save(user=self.request.user)
 
 
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
