@@ -16,6 +16,7 @@ from .views import (
     dashboard_view,
     home_view,
     login_view,
+    logout_view,
     map_view,
     register_view,
 )
@@ -29,6 +30,7 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard_page'),
     path('login/', login_view, name='login_page'),
     path('register/', register_view, name='register_page'),
+    path('logout/', logout_view, name='logout_page'),  # লগআউট রাউট যুক্ত করা হলো
 
     # ================= REST & Auth APIs =================
     # Auth APIs

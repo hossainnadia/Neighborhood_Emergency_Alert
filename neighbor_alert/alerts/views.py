@@ -1,7 +1,8 @@
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
-from django.shortcuts import render
-from rest_framework import generics, status, permissions
+from django.contrib.auth.forms import AuthenticationForm
+from django.shortcuts import redirect, render
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -24,14 +25,26 @@ def home_view(request):
 
 
 def login_view(request):
-    return render(request, 'login.html')
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
 
 
 def register_view(request):
     return render(request, 'register.html')
 
 
-# নিচের ভিউগুলোতে `@login_required` যুক্ত করা হয়েছে, ফলে লগইন ছাড়া কেউ ঢুকতে পারবে না
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+
 @login_required
 def alerts_view(request):
     return render(request, 'alert.html')

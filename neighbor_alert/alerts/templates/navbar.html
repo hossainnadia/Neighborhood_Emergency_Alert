@@ -79,8 +79,30 @@
         >Dashboard</a
       >
 
+      {% if request.user.is_authenticated %}
+      <!-- User Profile & Logout (লগইন করা থাকলে দেখাবে) -->
+      <div class="flex items-center gap-3">
+        <div
+          class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700"
+        >
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span class="text-xs font-bold text-gray-200"
+            >{{ request.user.username }}</span
+          >
+        </div>
+        <form action="{% url 'logout_page' %}" method="post" class="inline">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="text-xs text-red-400 hover:text-red-300 font-bold bg-red-950/40 border border-red-800/50 px-3 py-1.5 rounded-xl transition cursor-pointer"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+      {% else %}
       <!-- Guest Links (লগইন না থাকলে দেখাবে) -->
-      <div id="nav-guest" class="flex items-center gap-3">
+      <div class="flex items-center gap-3">
         <a
           href="{% url 'login_page' %}"
           class="bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 rounded-lg border border-slate-700 transition"
@@ -92,24 +114,7 @@
           >Register</a
         >
       </div>
-
-      <!-- User Profile & Logout (লগইন থাকলে দেখাবে) -->
-      <div id="nav-user" class="hidden flex items-center gap-3">
-        <div
-          class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700"
-        >
-          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-          <span id="nav-username" class="text-xs font-bold text-gray-200"
-            >User</span
-          >
-        </div>
-        <button
-          onclick="logoutUser()"
-          class="text-xs text-red-400 hover:text-red-300 font-bold bg-red-950/40 border border-red-800/50 px-3 py-1.5 rounded-xl transition"
-        >
-          Logout
-        </button>
-      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -144,8 +149,27 @@
       >Dashboard</a
     >
 
+    {% if request.user.is_authenticated %}
+    <!-- Mobile User Profile -->
+    <div
+      class="pt-3 flex justify-between items-center border-t border-slate-800"
+    >
+      <span class="text-sm font-bold text-gray-200"
+        >👤 {{ request.user.username }}</span
+      >
+      <form action="{% url 'logout_page' %}" method="post" class="inline">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="text-xs text-red-400 bg-red-950/50 px-3 py-1.5 rounded-lg border border-red-800/50 font-bold"
+        >
+          Logout
+        </button>
+      </form>
+    </div>
+    {% else %}
     <!-- Mobile Guest Buttons -->
-    <div id="mobile-guest" class="flex gap-3 pt-3">
+    <div class="flex gap-3 pt-3">
       <a
         href="{% url 'login_page' %}"
         class="w-1/2 text-center bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl border border-slate-700 transition"
@@ -157,28 +181,12 @@
         >Register</a
       >
     </div>
-
-    <!-- Mobile User Profile -->
-    <div
-      id="mobile-user"
-      class="hidden pt-3 flex justify-between items-center border-t border-slate-800"
-    >
-      <span id="mobile-username" class="text-sm font-bold text-gray-200"
-        >User Profile</span
-      >
-      <button
-        onclick="logoutUser()"
-        class="text-xs text-red-400 bg-red-950/50 px-3 py-1.5 rounded-lg border border-red-800/50 font-bold"
-      >
-        Logout
-      </button>
-    </div>
+    {% endif %}
   </div>
 </nav>
 
-<!-- Navbar Authentication Script -->
+<!-- Navbar Mobile Menu Toggle Script -->
 <script>
-  // Toggle Mobile Menu
   const menuBtn = document.getElementById("menu-btn");
   const mobileMenu = document.getElementById("mobile-menu");
   const iconOpen = document.getElementById("menu-icon-open");
@@ -191,58 +199,4 @@
       iconClose.classList.toggle("hidden");
     });
   }
-
-  // Check Auth State on Page Load
-  async function checkAuthState() {
-    const token = localStorage.getItem("access_token");
-
-    const navGuest = document.getElementById("nav-guest");
-    const navUser = document.getElementById("nav-user");
-    const mobileGuest = document.getElementById("mobile-guest");
-    const mobileUser = document.getElementById("mobile-user");
-
-    if (token) {
-      try {
-        // Fetch logged-in user details
-        const res = await fetch("/api/auth/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.ok) {
-          const user = await res.json();
-
-          // UI Switch to Logged In State
-          if (navGuest) navGuest.classList.add("hidden");
-          if (navUser) navUser.classList.remove("hidden");
-          if (mobileGuest) mobileGuest.classList.add("hidden");
-          if (mobileUser) mobileUser.classList.remove("hidden");
-
-          document.getElementById("nav-username").innerText =
-            user.username || "Profile";
-          document.getElementById("mobile-username").innerText =
-            `👤 ${user.username}`;
-          return;
-        }
-      } catch (err) {
-        console.error("Auth Check Failed", err);
-      }
-    }
-
-    // Default: Show Guest Buttons (Login/Register)
-    if (navGuest) navGuest.classList.remove("hidden");
-    if (navUser) navUser.classList.add("hidden");
-    if (mobileGuest) mobileGuest.classList.remove("hidden");
-    if (mobileUser) mobileUser.classList.add("hidden");
-  }
-
-  // Logout Functionality
-  function logoutUser() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    alert("Logged out successfully!");
-    window.location.href = "{% url 'login_page' %}";
-  }
-
-  // Execute check on page load
-  checkAuthState();
 </script>
