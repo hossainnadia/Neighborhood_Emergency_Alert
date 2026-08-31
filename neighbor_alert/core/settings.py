@@ -8,12 +8,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = 'django-insecure-$qyw5#k1si9=y0^83a4gn+kjbpo_zvr)v&t7=iym4*4f6gai$&'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-$qyw5#k1si9=y0^83a4gn+kjbpo_zvr)v&t7=iym4*4f6gai$&')
 
-# === DEPLOYMENT FIX 1: Debug বন্ধ করা হলো ===
+# Debug setting
 DEBUG = False
 
-# === DEPLOYMENT FIX 2: Allowed Hosts এলাউ করা হলো ===
+# Allowed hosts
 ALLOWED_HOSTS = ['*']
 
 
@@ -39,7 +39,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    # === DEPLOYMENT FIX 3: Whitenoise Middleware যোগ করা হলো ===
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,7 +53,6 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # root level templates ফোল্ডারের জন্য যুক্ত করা হলো
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -115,7 +113,6 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# === DEPLOYMENT FIX 4: Whitenoise Static Storage যুক্ত করা হলো ===
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media Files Settings
@@ -152,5 +149,5 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Login Redirect Settings (লগইন করা না থাকলে রিডায়রেক্ট করার জন্য)
+# Login Redirect Settings
 LOGIN_URL = '/login/'
