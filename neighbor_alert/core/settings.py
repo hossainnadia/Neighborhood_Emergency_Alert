@@ -1,11 +1,13 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+
+from dotenv import load_dotenv
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-$qyw5#k1si9=y0^83a4gn+kjbpo_zvr)v&t7=iym4*4f6gai$&')
